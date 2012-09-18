@@ -1,2 +1,11 @@
 Tips:
 1. use "VERSOSE=1 make" to get command line promoted
+2. use "cmake -DCMAKE_BUILD_TYPE=Debug .." to build debug binary.
+3. An exmpale for using a specific boost:
+    cmake -DBOOST_ROOT=/home/yya/WS/boost_1_48_0/install/ -DCMAKE_BUILD_TYPE=Debug -DBoost_DEBUG=on -DBoost_USE_STATIC_LIBS=TRUE -DBoost_USE_MULTITHREADED=FALSE ..
+   - Define the BOOST_ROOT to find a specific boost version
+   - Boost_DEBUG=on turn on the debug mode in FindBoost cmake modular
+   - Boost_USE_STATIC_LIBS ask FindBoost.cmake to use static libaries as
+     preferable libraries.
+   - Boost_USE_MULTITHREADED should be set to false for boost version greater
+     than 1.42.

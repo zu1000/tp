@@ -1,0 +1,2 @@
+1. sqlite performance. we can use block transaction and prepared statement to
+   improve the performance.
