@@ -15,7 +15,7 @@ namespace application {
         options(const std::string& description_name);
 
         bool parse(int ac, const char** av);
-        bool parse(std::string& file_name);
+        bool parse(const std::string& file_name);
 
         template <typename T>
         bool add(
@@ -33,12 +33,12 @@ namespace application {
         template <typename T>
         bool get(
                 const std::string& long_name,
-                T&                 value);
+                T&                 value) const;
 
         bool has(
-                const std::string& long_name);
+                const std::string& long_name) const;
 
-        std::string help();
+        std::string help() const;
 
     private:
         boost::program_options::options_description visible_;
@@ -88,7 +88,7 @@ namespace application {
     bool
     inline options::get(
             const std::string& long_name,
-            T&                 value)
+            T&                 value) const
     {
         if (!vm_.count(long_name))
             return false;

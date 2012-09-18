@@ -7,8 +7,9 @@ namespace gateways {
 namespace shfe {
 
     exchange_md_forward::exchange_md_forward(
-            comm::io::sender_receiver& sender_receiver)
-        : sender_receiver_(sender_receiver)
+            boost::asio::io_service& io,
+            const std::string& internal_server_config,
+            const std::string& local_service)
     {
     }
 
@@ -27,7 +28,7 @@ namespace shfe {
         std::string msg;
         comm::io::const_buffer buffer(msg.c_str(), msg.size());
         comm::io::error_code error;
-        sender_receiver_.send(buffer, error);
+        //sender_receiver_.send(buffer, error);
     }
 
 }}} //tp::gateways::shfe

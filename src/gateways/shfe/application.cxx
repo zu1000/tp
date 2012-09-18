@@ -68,53 +68,16 @@ namespace shfe {
             return false;
         }
 
-        GET_OPTION(front_gateway);
-        GET_OPTION(trading_day);
-        GET_OPTION(broker_id);
-        GET_OPTION(user_id);
-        GET_OPTION(password);
-        GET_OPTION(mac_address);
-        GET_OPTION(one_time_password);
-        GET_OPTION(client_ip_address);
-        GET_OPTION(server_address);
-        GET_OPTION(server_port);
-
-        GET_OPTION(equity_statistic_host);
-        GET_OPTION(equity_statistic_port);
-        GET_OPTION(derivative_statistic_host);
-        GET_OPTION(derivative_statistic_port);
-
 #undef GET_OPTION
 
-        comm::service::service service(
-                ~0u, comm::service::service::TCP,
-                server_address, boost::lexical_cast<uint32_t>(server_port),
-                true, client_ip_address);
-
-        sender_receiver_.reset(
-                new comm::io::sender_receiver(
-                    service, io_,
-                    boost::bind(
-                        &application::handle_security_request, this, _1, _2),
-                    boost::bind(
-                        &application::handle_error, this, _1)));
-
-        md_forward_.reset(new exchange_md_forward(*sender_receiver_));
+        md_forward_.reset(
+                new exchange_md_forward(
+                    io_, internal_server_config, local_service));
 
         session_.reset(
                 new session(
                     std::auto_ptr<session_configuration>(
-                        new session_configuration(
-                            front_gateway,
-                            trading_day,
-                            broker_id,
-                            user_id,
-                            password,
-                            "",
-                            "", "",
-                            mac_address,
-                            one_time_password,
-                            client_ip_address)),
+                        new session_configuration(shfe_front_config)),
                     *this,
                     *md_forward_));
 

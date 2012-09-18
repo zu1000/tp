@@ -31,7 +31,7 @@ namespace application {
     }
 
     bool
-    options::parse(std::string& file_name)
+    options::parse(const std::string& file_name)
     {
         try
         {
@@ -73,7 +73,7 @@ namespace application {
 
     bool
     options::has(
-            const std::string& long_name)
+            const std::string& long_name) const
     {
         if (vm_.count(long_name))
             return true;
@@ -81,7 +81,7 @@ namespace application {
     }
 
     std::string
-    options::help()
+    options::help() const
     {
         std::stringstream ss;
         ss << visible_;

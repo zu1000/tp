@@ -6,8 +6,9 @@
 #include <comm/io/handler.hpp>
 #include <comm/service/service.hpp>
 
-#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <vector>
 
 namespace tp {
 namespace gateways {
@@ -18,9 +19,9 @@ namespace shfe {
         typedef boost::shared_ptr<comm::io::peer> peer_ptr_type;
         typedef comm::io::const_buffer const_buffer;
         typedef comm::io::error_code error_code;
-        typedef boost::unordered_map
+        typedef std::map
             <
-                const std::string, peer_ptr_type
+                const std::string, std::vector<peer_ptr_type>
             > client_peers_type;
     public:
         client_manager(
@@ -38,7 +39,7 @@ namespace shfe {
                 peer_ptr_type peer,
                 const error_code& error);
 
-        peer_ptr_type get_client(const std::string& security_id);
+        std::vector<peer_ptr_type>& get_client(const std::string& security_id);
 
     private:
         comm::io::acceptor acceptor_;

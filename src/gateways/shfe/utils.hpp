@@ -3,6 +3,9 @@
 
 #include <utils/simple_logger.hpp>
 
+#include <application/options.hpp>
+
+#include <string>
 #include <cstring>
 
 extern "C"
@@ -24,6 +27,23 @@ namespace shfe {
     inline int64_t convert(double price)
     {
         return round(price * scale);
+    }
+
+    template<typename T>
+    inline void get_mandatory_option(
+            tp::application::options& options, const std::string& name, T& t)
+    {
+        if (!options.has(name) || !options.get(name, t))
+            throw std::invalid_argument(
+                    "Mandatory option " + name + " not found!");
+    }
+
+    template<typename T>
+    inline void get_optional_option(
+            tp::application::options& options, const std::string& name, T&t)
+    {
+        if (options.has(name))
+            options.get(name, t);
     }
 
 #define LOG(N) logger << #N  << ':' << msg.N<< '\n';

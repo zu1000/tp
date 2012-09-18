@@ -35,15 +35,17 @@ namespace shfe {
     {
     }
 
-    client_manager::peer_ptr_type
+    std::vector<client_manager::peer_ptr_type>&
     client_manager::get_client(const std::string& security_id)
     {
+        static std::vector<peer_ptr_type> empty_vector;
+
         client_peers_type::iterator find = client_peers_.find(security_id);
 
         if (find != client_peers_.end())
             return find->second;
 
-        return client_manager::peer_ptr_type();
+        return empty_vector;
     }
 
 }}} // tp::gateways::shfe
