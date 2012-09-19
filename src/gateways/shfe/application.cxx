@@ -18,14 +18,17 @@ namespace shfe {
         // Exchange Specific Options
         options_.add(
                 "shfe_front_config", "",
+                boost::optional<std::string>(),
                 "specify file path to exchange configuation file");
 
         options_.add(
                 "internal_server_config", "",
+                boost::optional<std::string>(),
                 "specify file path to exchange configuation file");
 
         options_.add(
-                "local_service", "", "customer server port");
+                "local_service", "", boost::optional<std::string>(),
+                "customer server port");
     }
 
     bool application::initialize(int argc, const char** argv)
@@ -44,7 +47,7 @@ namespace shfe {
     {
 #define GET_OPTION(OPTION) \
         std::string OPTION; \
-        if (!options_.has(#OPTION) && !options_.get(#OPTION, OPTION)) \
+        if (!options_.has(#OPTION) || !options_.get(#OPTION, OPTION)) \
         { \
             logger_ << "fail to get option [" << #OPTION << "]\n"; \
             return false; \
