@@ -1,4 +1,7 @@
 #include "client_manager.hpp"
+#include "utils.hpp"
+
+#include <application/options.hpp>
 
 #include <boost/bind.hpp>
 
@@ -8,10 +11,29 @@ namespace shfe {
 
     client_manager::client_manager(
             boost::asio::io_service& io,
-            comm::service::service& s)
-        : acceptor_(io, s,
-                boost::bind(&client_manager::handle_new_peer, this, _1))
-    {}
+            const std::string& config_file)
+    {
+        application::options options("client_manager");
+        if (!options.parse(config_file))
+            throw std::invalid_argument("Invalid local service config");
+
+        std::string nic;
+        short port;
+
+        get_mandatory_option(
+                options, "local_service_port", port);
+        get_optional_option(
+                options, "local_nic_ip", nic);
+
+        comm::service::service s(
+                -1, comm::service::service::TCP,
+                "", port, true);
+
+        acceptor_.reset(
+                new comm::io::acceptor(
+                    io, s,
+                    boost::bind(&client_manager::handle_new_peer, this, _1)));
+    }
 
     void client_manager::handle_new_peer(client_manager::peer_ptr_type peer)
     {
@@ -35,17 +57,22 @@ namespace shfe {
     {
     }
 
-    std::vector<client_manager::peer_ptr_type>&
-    client_manager::get_client(const std::string& security_id)
+    void
+    client_manager::send(const std::string& security_id, const std::string& msg)
     {
-        static std::vector<peer_ptr_type> empty_vector;
-
         client_peers_type::iterator find = client_peers_.find(security_id);
 
-        if (find != client_peers_.end())
-            return find->second;
+        if (find == client_peers_.end())
+            return;
 
-        return empty_vector;
+        std::vector<peer_ptr_type>& clients = find->second;
+
+        for (size_t i = 0; i < clients.size(); ++i)
+        {
+            comm::io::error_code error;
+            clients[i]->send(
+                    comm::io::const_buffer(msg.c_str(), msg.size()), error);
+        }
     }
 
 }}} // tp::gateways::shfe

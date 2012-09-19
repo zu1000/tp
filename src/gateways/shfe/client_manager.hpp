@@ -26,7 +26,7 @@ namespace shfe {
     public:
         client_manager(
                 boost::asio::io_service& io,
-                comm::service::service& s);
+                const std::string& config_file);
 
         void handle_new_peer(peer_ptr_type peer);
 
@@ -39,10 +39,10 @@ namespace shfe {
                 peer_ptr_type peer,
                 const error_code& error);
 
-        std::vector<peer_ptr_type>& get_client(const std::string& security_id);
+        void send(const std::string& security_id, const std::string& msg);
 
     private:
-        comm::io::acceptor acceptor_;
+        boost::scoped_ptr<comm::io::acceptor> acceptor_;
         client_peers_type client_peers_;
     };
 

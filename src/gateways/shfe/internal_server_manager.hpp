@@ -1,5 +1,4 @@
 #include <comm/io/sender.hpp>
-#include <application/options.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -12,9 +11,9 @@ namespace shfe {
     public:
         internal_server_manager(
                 boost::asio::io_service& io,
-                tp::application::options& options);
+                const std::string& config_file);
 
-        void send(const std::string& info);
+        void send(const std::string& security_id, const std::string& info);
 
     private:
         boost::scoped_ptr<comm::io::sender> stock_index_future_server_;

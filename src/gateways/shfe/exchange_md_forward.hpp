@@ -28,6 +28,7 @@ namespace shfe {
                 const void* meta_data);
 
     private:
+        boost::asio::io_service& io_;
         boost::scoped_ptr<client_manager> client_manager_;
         boost::scoped_ptr<internal_server_manager> internal_server_manager_;
     };

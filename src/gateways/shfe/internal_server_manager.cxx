@@ -10,8 +10,13 @@ namespace shfe {
 
     internal_server_manager::internal_server_manager(
             boost::asio::io_service& io,
-            tp::application::options& options)
+            const std::string& config_file)
     {
+        application::options options("internal");
+
+        if (!options.parse(config_file))
+            throw std::invalid_argument("Invalid internal server config");
+
         std::string stock_host, comm_host;
         short stock_port, comm_port;
 
@@ -40,14 +45,16 @@ namespace shfe {
         commodity_future_server_.reset(new comm::io::sender(comm, io));
     }
 
-    void internal_server_manager::send(const std::string& info)
+    void internal_server_manager::send(
+            const std::string& security_id, const std::string& info)
     {
+        bool index_future = security_id.substr(0, 2) == "jf";
         comm::io::error_code error;
-        if (stock_index_future_server_)
+        if (stock_index_future_server_ && index_future)
             stock_index_future_server_->send(
                     comm::io::const_buffer(info.c_str(), info.size()), error);
 
-        if (commodity_future_server_)
+        if (commodity_future_server_ && !index_future)
             commodity_future_server_->send(
                     comm::io::const_buffer(info.c_str(), info.size()), error);
     }

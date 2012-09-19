@@ -3,6 +3,8 @@
 #include <sstream>
 #include <fstream>
 
+#include <stdexcept>
+
 using namespace boost::program_options;
 
 namespace tp {
@@ -24,8 +26,9 @@ namespace application {
             notify(vm_);
             return true;
         }
-        catch(...) // any unexpected exception results a failure of parsing
+        catch(std::exception& e) // any unexpected exception results a failure of parsing
         {
+            std::cerr << e.what() << std::endl;
             return false;
         }
     }
