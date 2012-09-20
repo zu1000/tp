@@ -33,7 +33,7 @@ namespace udp {
         socket_.async_receive(
                 buffer(r_buffer_, buffer_size),
                 boost::bind(
-                    &peer::async_receive_handler, this, _1, _2));
+                    &peer::async_receive_handler, shared_from_this(), _1, _2));
 
         if (!r_handler || !e_handler)
             throw std::invalid_argument("invalid handler");
@@ -69,7 +69,7 @@ namespace udp {
             socket_.async_receive(
                     buffer(r_buffer_, buffer_size),
                     boost::bind(
-                        &peer::async_receive_handler, this, _1, _2));
+                        &peer::async_receive_handler, shared_from_this(), _1, _2));
     }
 
 }}}}} // tp::comm::io::impl::udp

@@ -12,6 +12,7 @@ namespace impl {
 namespace udp {
 
     class peer : public impl::peer
+               , public boost::enable_shared_from_this<peer>
     {
         friend class acceptor;
     public:
