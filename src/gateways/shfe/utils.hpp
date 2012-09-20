@@ -30,6 +30,13 @@ namespace shfe {
     }
 
     template<typename T>
+    inline void add_option(
+            tp::application::options& options, const std::string& name)
+    {
+        options.add(name, "", boost::optional<T>(), "", true);
+    }
+
+    template<typename T>
     inline void get_mandatory_option(
             tp::application::options& options, const std::string& name, T& t)
     {

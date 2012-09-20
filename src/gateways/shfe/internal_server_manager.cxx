@@ -12,22 +12,32 @@ namespace shfe {
             boost::asio::io_service& io,
             const std::string& config_file)
     {
+        std::string stock_host, comm_host;
+        unsigned short stock_port=0, comm_port=0;
+
+        const char* stock_index_future_host = "stock_index_future_host";
+        const char* commodity_future_host   = "commodity_future_host";
+        const char* stock_index_future_port = "stock_index_future_port";
+        const char* commodity_future_port   = "commodity_future_port";
+
         application::options options("internal");
+
+        add_option<std::string>(options, stock_index_future_host);
+        add_option<std::string>(options, commodity_future_host);
+        add_option<unsigned short>(options, stock_index_future_port);
+        add_option<unsigned short>(options, commodity_future_port);
 
         if (!options.parse(config_file))
             throw std::invalid_argument("Invalid internal server config");
 
-        std::string stock_host, comm_host;
-        short stock_port, comm_port;
-
         get_mandatory_option(
-                options, "stock_index_future_host", stock_host);
+                options, stock_index_future_host, stock_host);
         get_mandatory_option(
-                options, "stock_index_future_port", stock_port);
+                options, stock_index_future_port, stock_port);
         get_mandatory_option(
-                options, "commodity_future_host", comm_host);
+                options, commodity_future_host, comm_host);
         get_mandatory_option(
-                options, "commodity_future_port", comm_host);
+                options, commodity_future_port, comm_port);
 
         comm::service::service stock(
                 -1,
