@@ -87,6 +87,7 @@ namespace shfe {
 
     void exchange_md_handler::OnFrontDisconnected(int nReason)
     {
+        logger_ << "Get Disconnected\n";
         switch(nReason)
         {
         case 0:

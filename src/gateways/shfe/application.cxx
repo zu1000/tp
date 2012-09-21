@@ -41,6 +41,8 @@ namespace shfe {
 
         if (!create_session())
             return false;
+
+        return true;
     }
 
     bool application::create_session()

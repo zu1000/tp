@@ -14,11 +14,18 @@ namespace shfe {
             const std::string& config_file)
     {
         application::options options("client_manager");
+
+        const char* local_service_port = "local_service_port";
+        const char* local_nic_ip = "local_nic_ip";
+
+        add_option<unsigned short>(options, local_service_port);
+        add_option<std::string>(options, local_nic_ip);
+
         if (!options.parse(config_file))
             throw std::invalid_argument("Invalid local service config");
 
+        unsigned short port;
         std::string nic;
-        short port;
 
         get_mandatory_option(
                 options, "local_service_port", port);
@@ -27,7 +34,7 @@ namespace shfe {
 
         comm::service::service s(
                 -1, comm::service::service::TCP,
-                "", port, true);
+                "127.0.0.1", port, true, nic);
 
         acceptor_.reset(
                 new comm::io::acceptor(

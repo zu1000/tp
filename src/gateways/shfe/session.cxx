@@ -39,11 +39,11 @@ namespace shfe {
                 new exchange_md_handler(
                     *configuration_, state_handler_, event_handler_, *api_ ));
 
+        api_->RegisterSpi(md_handler_.get());
+
         // This is dangerous... but... the function doesn't change the string
         // content, it should be fine.
         api_->RegisterFront((char*)configuration_->front().c_str());
-
-        api_->RegisterSpi(md_handler_.get());
 
         api_->Init();
 
