@@ -89,4 +89,21 @@ namespace shfe {
         return api_->UnSubscribeMarketData(ids, 1) == 0;
     }
 
+    bool session::subscribe(const std::vector<std::string>& securities)
+    {
+        char ** ids = new char*[securities.size()];
+
+        for (size_t i = 0; i < securities.size(); ++i)
+        {
+            ids[i] = const_cast<char*>(securities.at(i).c_str());
+            subscribed_.insert(securities.at(i));
+        }
+
+        bool res = api_->SubscribeMarketData(ids, securities.size());
+
+        delete [] ids;
+
+        return res;
+    }
+
 }}}

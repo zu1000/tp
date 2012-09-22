@@ -4,6 +4,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <set>
+#include <vector>
 
 class CThostFtdcMdApi;
 
@@ -28,6 +29,8 @@ namespace shfe {
 
         bool subscribe(const std::string& security);
         bool unsubscribe(const std::string& security);
+
+        bool subscribe(const std::vector<std::string>& securities);
 
     private:
         CThostFtdcMdApi*                       api_;

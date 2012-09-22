@@ -90,6 +90,7 @@ namespace shfe {
         logger_ << "Get Disconnected\n";
         switch(nReason)
         {
+        default:
         case 0:
             state_handler_.stopped();
             break;

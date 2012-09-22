@@ -1,7 +1,7 @@
 #ifndef __tp_gateways_shfe_exchange_md_handler_hpp__
 #define __tp_gateways_shfe_exchange_md_handler_hpp__
 
-#include <utils/simple_logger.hpp>
+#include <iostream>
 
 extern "C"
 {
@@ -57,7 +57,7 @@ namespace shfe {
 
     private:
         const session_configuration& configuration_;
-        utils::simple_logger         logger_;
+        std::ostream&                logger_;
         session_state_handler&       state_handler_;
         event_handler&               event_handler_;
         CThostFtdcMdApi&             api_;

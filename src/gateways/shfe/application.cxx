@@ -2,14 +2,52 @@
 #include "session.hpp"
 #include "exchange_md_handler.hpp"
 #include "session_configuration.hpp"
+#include "utils.hpp"
 
 #include <iostream>
+#include <fstream>
 
 #include <boost/lexical_cast.hpp>
 
 namespace tp {
 namespace gateways {
 namespace shfe {
+
+    void parse_security_file(
+            const std::string& filename, std::vector<std::string>& securities)
+    {
+        std::ifstream input;
+        input.open(filename.c_str());
+
+        while(input.good())
+        {
+            char security[10] = {0};
+            input.getline(security, 6);
+            securities.push_back(security);
+        }
+    }
+
+    bool parse_security_request(
+            const std::string& req, std::string& security, std::string& user)
+    {
+        // The request format should be "if0001,user\n"
+
+        // Wrong format!
+        size_t pos = req.find(",");
+        if (pos == std::string::npos)
+            return false;
+
+        security = req.substr(0, pos);
+        user = req.substr(pos+1);
+
+        pos = req.find("\n");
+
+        // This might be optional
+        if (pos != std::string::npos)
+            user = user.substr(0, pos);
+
+        return true;
+    }
 
     application::application()
         : options_("shfe_gw")
@@ -29,6 +67,10 @@ namespace shfe {
         options_.add(
                 "local_service", "", boost::optional<std::string>(),
                 "customer server port");
+
+        options_.add(
+                "contracts_file", "", boost::optional<std::string>(),
+                "the file contains the contracts to be subscribed initially");
     }
 
     bool application::initialize(int argc, const char** argv)
@@ -47,17 +89,15 @@ namespace shfe {
 
     bool application::create_session()
     {
-#define GET_OPTION(OPTION) \
-        std::string OPTION; \
-        if (!options_.has(#OPTION) || !options_.get(#OPTION, OPTION)) \
-        { \
-            logger_ << "fail to get option [" << #OPTION << "]\n"; \
-            return false; \
-        }
-
-        GET_OPTION(shfe_front_config);
-        GET_OPTION(internal_server_config);
-        GET_OPTION(local_service);
+        std::string shfe_front_config, internal_server_config, local_service;
+        get_mandatory_option(
+                options_, "shfe_front_config", shfe_front_config);
+        get_mandatory_option(
+                options_, "internal_server_config", internal_server_config);
+        get_mandatory_option(
+                options_, "local_service", local_service);
+        get_optional_option(
+                options_, "contracts_file", security_file_name_);
 
         if (!options_.parse(shfe_front_config))
         {
@@ -94,20 +134,40 @@ namespace shfe {
     std::size_t application::handle_security_request(
             const comm::io::const_buffer& buffer, std::size_t size)
     {
+        std::string req(boost::asio::buffer_cast<const char*>(buffer), size);
+
+        std::string security, user;
+
+        if (!parse_security_request(req, security, user))
+            logger_ << "invalid request: " << req << "\n";
+
+        session_->subscribe(security);
+
     }
 
     bool application::handle_error(const comm::io::error_code& error)
     {
-        logger_ << "error: " << error.message();
+        logger_ << "error: " << error.message() << "\n";
     }
 
     void application::started()
-    {}
+    {
+        if (security_file_name_.empty())
+            return;
+
+        std::vector<std::string> securities;
+        parse_security_file(security_file_name_, securities);
+        session_->subscribe(securities);
+    }
 
     void application::stopped()
-    {}
+    {
+        logger_ << "stopped\n";
+    }
 
     void application::stopped_on_error(const std::string& error)
-    {}
+    {
+        logger_ << "stoped on error: " << error << "\n";
+    }
 
 }}} // tp::gateways::shfe

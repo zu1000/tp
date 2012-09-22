@@ -55,8 +55,8 @@ namespace shfe {
 
 #define LOG(N) logger << #N  << ':' << msg.N<< '\n';
 
-    inline utils::simple_logger::client_type& operator << (
-            utils::simple_logger::client_type& logger,
+    inline std::ostream& operator << (
+            std::ostream& logger,
             const CThostFtdcReqUserLoginField& msg)
     {
         logger << "CThostFtdcReqUserLoginField:\n";
@@ -74,8 +74,8 @@ namespace shfe {
         return logger;
     }
 
-    inline utils::simple_logger::client_type& operator << (
-            utils::simple_logger::client_type& logger,
+    inline std::ostream& operator << (
+            std::ostream& logger,
             const CThostFtdcRspUserLoginField& msg)
     {
         logger << "CThostFtdcRspUserLoginField:\n";
@@ -95,8 +95,8 @@ namespace shfe {
         return logger;
     }
 
-    inline utils::simple_logger::client_type& operator << (
-            utils::simple_logger::client_type& logger,
+    inline std::ostream& operator << (
+            std::ostream& logger,
             const CThostFtdcRspInfoField& msg)
     {
         logger << "CThostFtdcRspInfoField:\n";
@@ -106,8 +106,8 @@ namespace shfe {
         return logger;
     }
 
-    inline utils::simple_logger::client_type& operator << (
-            utils::simple_logger::client_type& logger,
+    inline std::ostream& operator << (
+            std::ostream& logger,
             const CThostFtdcDepthMarketDataField& msg)
     {
         logger << "CThostFtdcDepthMarketDataField:\n";
