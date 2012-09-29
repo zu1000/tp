@@ -32,11 +32,6 @@ namespace shfe {
     private:
         bool create_session();
 
-        std::size_t handle_security_request(
-                const comm::io::const_buffer& buffer, std::size_t size);
-
-        bool handle_error(const comm::io::error_code& error);
-
         virtual void started();
         virtual void stopped();
         virtual void stopped_on_error(const std::string& error);

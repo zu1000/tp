@@ -131,25 +131,6 @@ namespace shfe {
         return true;
     }
 
-    std::size_t application::handle_security_request(
-            const comm::io::const_buffer& buffer, std::size_t size)
-    {
-        std::string req(boost::asio::buffer_cast<const char*>(buffer), size);
-
-        std::string security, user;
-
-        if (!parse_security_request(req, security, user))
-            logger_ << "invalid request: " << req << "\n";
-
-        session_->subscribe(security);
-
-    }
-
-    bool application::handle_error(const comm::io::error_code& error)
-    {
-        logger_ << "error: " << error.message() << "\n";
-    }
-
     void application::started()
     {
         if (security_file_name_.empty())
