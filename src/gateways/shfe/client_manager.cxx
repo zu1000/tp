@@ -9,6 +9,20 @@ namespace tp {
 namespace gateways {
 namespace shfe {
 
+    static bool parse_request(
+            const std::string& req, std::string& security, std::string& user_id)
+    {
+        size_t pos = req.find(",");
+
+        if (pos == std::string::npos)
+            return false;
+
+        security = req.substr(0, pos);
+        user_id = req.substr(pos+1);
+
+        return true;
+    }
+
     client_manager::client_manager(
             boost::asio::io_service& io,
             const std::string& config_file)
@@ -56,6 +70,25 @@ namespace shfe {
             const const_buffer& buffer,
             std::size_t size)
     {
+        std::string req(boost::asio::buffer_cast<const char*>(buffer), size);
+
+        std::string security, user_id;
+
+        size_t pos = req.find("\n");
+        size_t handled_size = 0;
+
+        while (pos != std::string::npos)
+        {
+            if (parse_request(req.substr(0, pos), security, user_id))
+                client_peers_[security].push_back(peer);
+
+            req.erase(0, pos+1);
+            handled_size += pos+1;
+
+            pos = req.find("\n");
+        }
+
+        return handled_size;
     }
 
     bool client_manager::handle_peer_error(
