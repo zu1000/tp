@@ -7,6 +7,7 @@
 
 #include <string>
 #include <cstring>
+#include <limits>
 
 extern "C"
 {
@@ -26,6 +27,9 @@ namespace shfe {
     static const uint64_t scale = 1e6;
     inline int64_t convert(double price)
     {
+        if (price == std::numeric_limits<double>::max())
+            price = 0.0;
+
         return round(price * scale);
     }
 
@@ -59,7 +63,7 @@ namespace shfe {
             std::ostream& logger,
             const CThostFtdcReqUserLoginField& msg)
     {
-        logger << "CThostFtdcReqUserLoginField:\n";
+        logger << ">>>> CThostFtdcReqUserLoginField:\n";
         LOG(TradingDay)
         LOG(BrokerID)
         LOG(UserID)
@@ -78,7 +82,7 @@ namespace shfe {
             std::ostream& logger,
             const CThostFtdcRspUserLoginField& msg)
     {
-        logger << "CThostFtdcRspUserLoginField:\n";
+        logger << "<<<< CThostFtdcRspUserLoginField:\n";
         LOG(TradingDay)
         LOG(LoginTime)
         LOG(BrokerID)
@@ -99,7 +103,7 @@ namespace shfe {
             std::ostream& logger,
             const CThostFtdcRspInfoField& msg)
     {
-        logger << "CThostFtdcRspInfoField:\n";
+        logger << "<<<< CThostFtdcRspInfoField:\n";
         LOG(ErrorID)
         LOG(ErrorMsg)
 
@@ -110,7 +114,7 @@ namespace shfe {
             std::ostream& logger,
             const CThostFtdcDepthMarketDataField& msg)
     {
-        logger << "CThostFtdcDepthMarketDataField:\n";
+        logger << "<<<< CThostFtdcDepthMarketDataField:\n";
         LOG(TradingDay)
         LOG(InstrumentID)
         LOG(ExchangeID)

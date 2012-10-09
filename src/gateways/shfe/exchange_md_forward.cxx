@@ -26,7 +26,7 @@ namespace shfe {
                build_price(statistic.open_, statistic.scale_) + "," +
                build_price(statistic.close_, statistic.scale_) + "," +
                build_price(statistic.settle_, statistic.scale_) + "," +
-               boost::lexical_cast<std::string>(statistic.last_quantity_);
+               boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
     }
 
     exchange_md_forward::exchange_md_forward(

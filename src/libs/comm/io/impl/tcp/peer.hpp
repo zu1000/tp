@@ -27,6 +27,8 @@ namespace tcp {
                 const const_buffer& buffer,
                 error_code& error);
 
+        virtual std::string peer_address() const;
+
     private:
         void async_receive_handler(
                 const boost::system::error_code& ec,

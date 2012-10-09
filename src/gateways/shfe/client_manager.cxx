@@ -63,6 +63,8 @@ namespace shfe {
                     &client_manager::handle_peer_event, this, peer, _1, _2),
                 boost::bind(
                     &client_manager::handle_peer_error, this, peer, _1));
+
+        std::cout << "Accepted client from: " << peer->peer_address() << std::endl;
     }
 
     size_t client_manager::handle_peer_event(
@@ -71,6 +73,8 @@ namespace shfe {
             std::size_t size)
     {
         std::string req(boost::asio::buffer_cast<const char*>(buffer), size);
+
+        std::cout << "Received subscription for contract: " << req << std::endl;
 
         std::string security, user_id;
 

@@ -139,21 +139,21 @@ namespace shfe {
             CThostFtdcSpecificInstrumentField *pSpecificInstrument,
             CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
     {
-        logger_ << "Failed to subscribe: " << pSpecificInstrument->InstrumentID;
+        logger_ << "subscribed: " << pSpecificInstrument->InstrumentID << "\n";
     }
 
     void exchange_md_handler::OnRspUnSubMarketData(
             CThostFtdcSpecificInstrumentField *pSpecificInstrument,
             CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
     {
-        logger_ << "Failed to unsubscribe: " << pSpecificInstrument->InstrumentID;
+        logger_ << "unsubscribed: " << pSpecificInstrument->InstrumentID << "\n";
     }
 
     void exchange_md_handler::OnRtnDepthMarketData(
             CThostFtdcDepthMarketDataField *pDepthMarketData)
     {
-        comm::protocol::internal::statistic_t
-            statistic(~0u);
+        logger_ << *pDepthMarketData;
+        comm::protocol::internal::statistic_t statistic(~0u);
 
         statistic.scale_ = scale;
 

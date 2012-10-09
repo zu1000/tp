@@ -54,6 +54,12 @@ namespace udp {
         return socket_.send(boost::asio::buffer(buffer));
     }
 
+    std::string
+    peer::peer_address() const
+    {
+        return "";
+    }
+
     void
     peer::async_receive_handler(
             const boost::system::error_code& ec,

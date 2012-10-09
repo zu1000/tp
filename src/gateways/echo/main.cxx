@@ -19,7 +19,7 @@ bool handle_error(const io::error_code& error)
 
 void handle_peer(boost::shared_ptr<io::peer> p)
 {
-    std::cout << "get new peer" << std::endl;
+    std::cout << "get new peer: " << p->peer_address() << std::endl;
     p->init_peer(handle_message, handle_error);
 }
 

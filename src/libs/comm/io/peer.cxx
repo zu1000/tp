@@ -37,4 +37,10 @@ namespace io {
         return id_;
     }
 
+    std::string
+    peer::peer_address() const
+    {
+        return peer_->peer_address();
+    }
+
 }}} // tp::comm::io

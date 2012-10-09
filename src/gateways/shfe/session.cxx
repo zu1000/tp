@@ -97,6 +97,8 @@ namespace shfe {
         {
             ids[i] = const_cast<char*>(securities.at(i).c_str());
             subscribed_.insert(securities.at(i));
+
+            std::cout << "subscribe: " << ids[i] << std::endl;
         }
 
         bool res = api_->SubscribeMarketData(ids, securities.size());

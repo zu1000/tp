@@ -21,6 +21,8 @@ namespace impl {
         virtual std::size_t send(
                 const const_buffer& buffer,
                 error_code& error) = 0;
+
+        virtual std::string peer_address() const = 0;
     };
 
 }}}} // tp::comm:io::impl

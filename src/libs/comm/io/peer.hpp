@@ -28,7 +28,10 @@ namespace impl{
                 error_code& error);
 
         void peer_id(std::string& id);
+
         const std::string& peer_id() const;
+
+        std::string peer_address() const;
 
     private:
         boost::shared_ptr<impl::peer> peer_;

@@ -40,6 +40,12 @@ namespace tcp {
         return socket_.send(boost::asio::buffer(buffer));
     }
 
+    std::string
+    peer::peer_address() const
+    {
+        return socket_.remote_endpoint().address().to_string();
+    }
+
     void
     peer::async_receive_handler(
             const boost::system::error_code& ec,

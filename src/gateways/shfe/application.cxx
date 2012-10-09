@@ -22,31 +22,11 @@ namespace shfe {
         while(input.good())
         {
             char security[10] = {0};
-            input.getline(security, 6);
-            securities.push_back(security);
+            input.getline(security, sizeof(security));
+            std::cout << "read contract: " << security << std::endl;
+            if (std::strlen(security))
+                securities.push_back(security);
         }
-    }
-
-    bool parse_security_request(
-            const std::string& req, std::string& security, std::string& user)
-    {
-        // The request format should be "if0001,user\n"
-
-        // Wrong format!
-        size_t pos = req.find(",");
-        if (pos == std::string::npos)
-            return false;
-
-        security = req.substr(0, pos);
-        user = req.substr(pos+1);
-
-        pos = req.find("\n");
-
-        // This might be optional
-        if (pos != std::string::npos)
-            user = user.substr(0, pos);
-
-        return true;
     }
 
     application::application()
