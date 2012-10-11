@@ -11,6 +11,7 @@ std::size_t handle_message(const io::const_buffer& buff, std::size_t size)
 {
     std::string str(boost::asio::buffer_cast<const char*>(buff), size);
     std::cout << str << std::endl;
+    return size;
 }
 
 bool handle_error(const io::error_code& error)

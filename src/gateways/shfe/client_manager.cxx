@@ -74,6 +74,8 @@ namespace shfe {
     {
         std::string req(boost::asio::buffer_cast<const char*>(buffer), size);
 
+        if (!size) return size;
+
         std::cout << "Received subscription for contract: " << req << std::endl;
 
         std::string security, user_id;
@@ -114,8 +116,18 @@ namespace shfe {
         for (size_t i = 0; i < clients.size(); ++i)
         {
             comm::io::error_code error;
-            clients[i]->send(
-                    comm::io::const_buffer(msg.c_str(), msg.size()), error);
+
+            try
+            {
+                if (clients[i])
+                    clients[i]->send(
+                            comm::io::const_buffer(msg.c_str(), msg.size()), error);
+            }
+            catch(...)
+            {
+                // assume that cnnection is gone... delete the client
+                clients[i].reset();
+            }
         }
     }
 

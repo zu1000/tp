@@ -62,6 +62,8 @@ namespace shfe {
         comm::io::error_code error;
         client_manager_->send(security_id, msg);
         internal_server_manager_->send(security_id, msg);
+
+        std::cout << msg << std::endl;
     }
 
 }}} //tp::gateways::shfe

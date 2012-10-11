@@ -152,7 +152,7 @@ namespace shfe {
     void exchange_md_handler::OnRtnDepthMarketData(
             CThostFtdcDepthMarketDataField *pDepthMarketData)
     {
-        logger_ << *pDepthMarketData;
+        logger_ << "Got MarketDepthData\n";
         comm::protocol::internal::statistic_t statistic(~0u);
 
         statistic.scale_ = scale;
