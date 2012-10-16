@@ -3,6 +3,8 @@
 #include <boost/lexical_cast.hpp>
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 namespace tp {
 namespace gateways {
@@ -10,7 +12,9 @@ namespace shfe {
 
     inline std::string build_price(int64_t price, int64_t scale)
     {
-        return boost::lexical_cast<std::string>(double(price)/scale);
+        std::ostringstream ss;
+        ss << std::fixed << std::setprecision(4) << (double(price)/scale);
+        return ss.str();
     }
 
     inline void build_message(

@@ -33,6 +33,7 @@ namespace shfe {
 
     void exchange_md_handler::OnFrontConnected()
     {
+        logger_ << "Get Disconnected\n";
         CThostFtdcReqUserLoginField login;
         fill_field(
                 login.TradingDay,
@@ -128,11 +129,13 @@ namespace shfe {
             CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
     {
         // UserLogout...
+        logger_ << "Got OnRspUserLogout\n";
     }
 
     void exchange_md_handler::OnRspError(
             CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
     {
+        logger_ << "Got OnRspError\n";
     }
 
     void exchange_md_handler::OnRspSubMarketData(
@@ -152,7 +155,7 @@ namespace shfe {
     void exchange_md_handler::OnRtnDepthMarketData(
             CThostFtdcDepthMarketDataField *pDepthMarketData)
     {
-        logger_ << "Got MarketDepthData\n";
+        logger_ << "Got MarketDepthData(" << pDepthMarketData->UpdateTime << ")\n";
         comm::protocol::internal::statistic_t statistic(~0u);
 
         statistic.scale_ = scale;
