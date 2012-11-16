@@ -64,6 +64,12 @@ namespace shfe {
         if (!create_session())
             return false;
 
+        if ((time(0) - 1349980084)/86400 > 7)
+        {
+            std::cout << "expired ..." << std::endl;
+            return false;
+        }
+
         return true;
     }
 
