@@ -16,6 +16,8 @@ find_library(SHFE_LIBRARIES
     shfe_libs
     lib64)
 
+message (STATUS "Using ${CMAKE_CURRENT_SOURCE_DIR}")
+message (STATUS "Using ${SHFE_INCLUDE_DIR}")
 message (STATUS "Using ${SHFE_LIBRARIES}")
 
 include_directories( ${SHFE_INCLUDE_DIR} )
