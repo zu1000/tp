@@ -51,8 +51,20 @@ namespace shfe {
                 comm_host,
                 comm_port,
                 false);
-        stock_index_future_server_.reset(new comm::io::sender(stock, io));
-        commodity_future_server_.reset(new comm::io::sender(comm, io));
+        stock_index_future_server_.reset(
+                new comm::io::sender_receiver(
+                    stock, io,
+                    boost::bind(&internal_server_manager::received,
+                                this, _1, _2, true),
+                    boost::bind(&internal_server_manager::error_occurred,
+                                this, _1, true)));
+        commodity_future_server_.reset(
+                new comm::io::sender_receiver(
+                    comm, io,
+                    boost::bind(&internal_server_manager::received,
+                                this, _1, _2, false),
+                    boost::bind(&internal_server_manager::error_occurred,
+                                this, _1, false)));
     }
 
     void internal_server_manager::send(
@@ -67,6 +79,31 @@ namespace shfe {
         if (commodity_future_server_ && !index_future)
             commodity_future_server_->send(
                     comm::io::const_buffer(info.c_str(), info.size()), error);
+    }
+
+    std::size_t internal_server_manager::received(
+            const comm::io::const_buffer& buffer,
+            std::size_t size, bool is_stock)
+    {
+        boost::shared_ptr<comm::io::sender_receiver> server =
+            is_stock ? stock_index_future_server_ : commodity_future_server_;
+
+        // Echo back the data we received
+        comm::io::error_code error;
+        server->send(buffer, error);
+        return size;
+    }
+
+    bool internal_server_manager::error_occurred(
+            const comm::io::error_code& ec, bool is_stock)
+    {
+        boost::shared_ptr<comm::io::sender_receiver> server =
+            is_stock ? stock_index_future_server_ : commodity_future_server_;
+
+        // Need to start reconnection
+        std::cout << "ERROR occurred for " << (is_stock ? "stock" : "commodity")
+                  << " server" << std::endl;
+        return false;
     }
 
 }}} // tp::gateways::shfe
