@@ -1,12 +1,14 @@
 #include <comm/io/sender_receiver.hpp>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 namespace tp {
 namespace gateways {
 namespace shfe {
 
     class internal_server_manager
+        : public boost::enable_shared_from_this<internal_server_manager>
     {
     public:
         internal_server_manager(

@@ -62,9 +62,9 @@ namespace shfe {
                 new comm::io::sender_receiver(
                     comm, io,
                     boost::bind(&internal_server_manager::received,
-                                this, _1, _2, false),
+                                shared_from_this(), _1, _2, false),
                     boost::bind(&internal_server_manager::error_occurred,
-                                this, _1, false)));
+                                shared_from_this(), _1, false)));
     }
 
     void internal_server_manager::send(
