@@ -70,7 +70,6 @@ namespace service {
 
         // Management functionalities
         bool publish(const service_ptr& service);
-        bool republish(const service_ptr& service);
         bool unpublish(const service_id& id);
         void interested_service_id(const service_id& id);
         bool has_service(const service_id& id, service_ptr& ptr);
@@ -158,23 +157,6 @@ namespace service {
 
         return own_services_.insert(
             service_id_to_ptr_map::value_type(service->id(), service)).second;
-    }
-
-    template<typename D, typename S, typename C>
-    inline bool
-    manager<D, S, C>::republish(const service_ptr& service)
-    {
-        boost::mutex::scoped_lock l(mutex_);
-
-        if (!service) return false;
-
-        service_id_to_ptr_map::iterator find =
-            own_services_.find(service->id());
-
-        if (find == own_services_.end()) return false;
-
-        // TODO: republish the services
-        return true;
     }
 
     template<typename D, typename S, typename C>
