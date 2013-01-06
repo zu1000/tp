@@ -179,7 +179,8 @@ namespace ticker {
         if (update_thread)
         {
             stop_update_thread = true;
-            update_thread->join();
+            if (update_thread->joinable())
+                update_thread->join();
             stop_update_thread = false;
         }
     }
