@@ -1,0 +1,5 @@
+#ifndef __tp_comm_codec_fast_codec_hpp__
+#define __tp_comm_codec_fast_codec_hpp__
+
+
+#endif//__tp_comm_codec_fast_codec_hpp__
