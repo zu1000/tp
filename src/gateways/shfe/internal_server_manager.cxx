@@ -11,6 +11,9 @@ namespace shfe {
     internal_server_manager::internal_server_manager(
             boost::asio::io_service& io,
             const std::string& config_file)
+        : stock_timer_(io)
+        , comm_timer_(io)
+        , io_(io)
     {
         std::string stock_host, comm_host;
         unsigned short stock_port=0, comm_port=0;
@@ -39,32 +42,25 @@ namespace shfe {
         get_mandatory_option(
                 options, commodity_future_port, comm_port);
 
-        comm::service::service stock(
-                -1,
-                comm::service::service::TCP,
-                stock_host,
-                stock_port,
-                false);
-        comm::service::service comm(
-                -1,
-                comm::service::service::TCP,
-                comm_host,
-                comm_port,
-                false);
-        stock_index_future_server_.reset(
-                new comm::io::sender_receiver(
-                    stock, io,
-                    boost::bind(&internal_server_manager::received,
-                                this, _1, _2, true),
-                    boost::bind(&internal_server_manager::error_occurred,
-                                this, _1, true)));
-        commodity_future_server_.reset(
-                new comm::io::sender_receiver(
-                    comm, io,
-                    boost::bind(&internal_server_manager::received,
-                                shared_from_this(), _1, _2, false),
-                    boost::bind(&internal_server_manager::error_occurred,
-                                shared_from_this(), _1, false)));
+        stock_.reset(
+                new comm::service::service(
+                    -1,
+                    comm::service::service::TCP,
+                    stock_host,
+                    stock_port,
+                    false)
+                );
+        comm_.reset(
+                new comm::service::service(
+                    -1,
+                    comm::service::service::TCP,
+                    comm_host,
+                    comm_port,
+                    false)
+                );
+
+        connect(true);
+        connect(false);
     }
 
     void internal_server_manager::send(
@@ -103,7 +99,46 @@ namespace shfe {
         // Need to start reconnection
         std::cout << "ERROR occurred for " << (is_stock ? "stock" : "commodity")
                   << " server" << std::endl;
+
+        std::cout << "Reset and reconnect the servers" << std::endl;
+
+        connect(is_stock, ec);
+
         return false;
+    }
+
+    bool internal_server_manager::connect(
+            bool is_stock,
+            const comm::io::error_code& ec)
+    {
+        std::string name = is_stock ? " Stock Index " : " Commodity Index ";
+        try
+        {
+            boost::shared_ptr<comm::io::sender_receiver>& server =
+                is_stock ? stock_index_future_server_ : commodity_future_server_;
+
+            std::cout << "Connecting" << name << "server" << std::endl;
+
+            server.reset(
+                    new comm::io::sender_receiver(
+                        (is_stock ? *stock_ : *comm_), io_,
+                        boost::bind(&internal_server_manager::received,
+                                    this, _1, _2, is_stock),
+                        boost::bind(&internal_server_manager::error_occurred,
+                                    this, _1, is_stock)));
+        }
+        catch(boost::system::system_error& e)
+        {
+            boost::asio::deadline_timer& timer =
+                is_stock ? stock_timer_ : comm_timer_;
+            std::cout << "Connect to" << name
+                      << "server failed, will reconnect in 2 sec"
+                      << std::endl;
+            timer.expires_from_now(boost::posix_time::seconds(2));
+            timer.async_wait(
+                    boost::bind(&internal_server_manager::connect,
+                                this, is_stock, _1));
+        }
     }
 
 }}} // tp::gateways::shfe
