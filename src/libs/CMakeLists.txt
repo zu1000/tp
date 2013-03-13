@@ -1,7 +1,7 @@
 add_subdirectory (xmllite)
 add_subdirectory (comm)
 add_subdirectory (utils)
-add_subdirectory (web)
+#add_subdirectory (web)
 add_subdirectory (gateway)
 add_subdirectory (database)
 add_subdirectory (application)
