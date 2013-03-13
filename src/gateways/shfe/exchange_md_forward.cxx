@@ -23,7 +23,9 @@ namespace shfe {
             std::string& msg)
     {
         double scale = statistic.scale_;
+        /*
         msg = security_id + "," +
+               boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
                build_price(statistic.last_, statistic.scale_) + "," +
                build_price(statistic.high_, statistic.scale_) + "," +
                build_price(statistic.low_, statistic.scale_) + "," +
@@ -31,6 +33,11 @@ namespace shfe {
                build_price(statistic.close_, statistic.scale_) + "," +
                build_price(statistic.settle_, statistic.scale_) + "," +
                boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
+        */
+        msg = security_id + "," +
+              boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
+              build_price(statistic.last_, statistic.scale_) + "," +
+              boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
     }
 
     exchange_md_forward::exchange_md_forward(

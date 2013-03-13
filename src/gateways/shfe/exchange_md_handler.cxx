@@ -167,6 +167,8 @@ namespace shfe {
         statistic.settle_       = convert(pDepthMarketData->SettlementPrice);
         statistic.last_         = convert(pDepthMarketData->LastPrice);
         statistic.last_quantity_= pDepthMarketData->Volume;
+
+        statistic.utc_timestamp_= atoi(pDepthMarketData->UpdateTime);
         // Set utc_timestamp...
         event_handler_.handle(statistic, pDepthMarketData->InstrumentID);
     }
