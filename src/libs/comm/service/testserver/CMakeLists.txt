@@ -9,4 +9,5 @@ target_link_libraries (testserver_service
         io
         pthread
         ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY})
+        ${Boost_SYSTEM_LIBRARY}
+        rt)

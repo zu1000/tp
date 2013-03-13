@@ -6,6 +6,7 @@ target_link_libraries (test_ticker_database
         utils
         database
         sqlite3
+        rt
         ${Boost_LIBRARIES})
 
 add_test (TestTickerDatabase test_ticker_database)

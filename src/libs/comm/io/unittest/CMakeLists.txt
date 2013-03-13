@@ -5,6 +5,7 @@ target_link_libraries (test_io
         io
         service
         pthread
+        rt
         ${Boost_LIBRARIES})
 
 add_test (TestIO test_io)

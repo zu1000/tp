@@ -14,4 +14,5 @@ target_link_libraries (
     codec_util
     protocol_internal
     sqlite3
+    rt
     ${Boost_LIBRARIES})

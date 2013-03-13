@@ -14,7 +14,7 @@ set (TP_INCLUDE_DIR
      ${PROJECT_SOURCE_DIR}/src/libs)
 
 include_directories ( ${TP_INCLUDE_DIR} )
-include_directories ( ${Wt_INCLUDE_DIR} )
+#include_directories ( ${Wt_INCLUDE_DIR} )
 
 find_package (Boost REQUIRED
         unit_test_framework

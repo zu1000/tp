@@ -9,6 +9,7 @@ target_link_libraries (test_service
         pthread
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
         ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY})
+        ${Boost_SYSTEM_LIBRARY}
+        rt)
 
 add_test (TestService test_service)

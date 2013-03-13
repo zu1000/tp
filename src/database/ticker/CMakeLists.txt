@@ -17,6 +17,7 @@ target_link_libraries (
     protocol_internal
     xmllite
     sqlite3
+    rt
     ${Boost_LIBRARIES})
 
 add_subdirectory(unittest)
