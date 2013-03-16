@@ -20,24 +20,29 @@ namespace shfe {
     inline void build_message(
             const std::string& security_id,
             const comm::protocol::internal::statistic_t& statistic,
-            std::string& msg)
+            std::string& msg, bool longmsg)
     {
         double scale = statistic.scale_;
-        /*
-        msg = security_id + "," +
-               boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
-               build_price(statistic.last_, statistic.scale_) + "," +
-               build_price(statistic.high_, statistic.scale_) + "," +
-               build_price(statistic.low_, statistic.scale_) + "," +
-               build_price(statistic.open_, statistic.scale_) + "," +
-               build_price(statistic.close_, statistic.scale_) + "," +
-               build_price(statistic.settle_, statistic.scale_) + "," +
-               boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
-        */
-        msg = security_id + "," +
-              boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
-              build_price(statistic.last_, statistic.scale_) + "," +
-              boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
+
+        if (longmsg)
+        {
+            msg = security_id + "," +
+                    boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
+                    build_price(statistic.last_, statistic.scale_) + "," +
+                    build_price(statistic.open_, statistic.scale_) + "," +
+                    build_price(statistic.high_, statistic.scale_) + "," +
+                    build_price(statistic.low_, statistic.scale_) + "," +
+                    build_price(statistic.close_, statistic.scale_) + "," +
+                    build_price(statistic.settle_, statistic.scale_) + "," +
+                    boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
+        }
+        else
+        {
+            msg = security_id + "," +
+                    boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
+                    build_price(statistic.last_, statistic.scale_) + "," +
+                    boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
+        }
     }
 
     exchange_md_forward::exchange_md_forward(
@@ -68,10 +73,9 @@ namespace shfe {
 
         // TODO...convert to string
         std::string msg;
-        build_message(security_id, statistic, msg);
-        comm::io::const_buffer buffer(msg.c_str(), msg.size());
-        comm::io::error_code error;
+        build_message(security_id, statistic, msg, false);
         client_manager_->send(security_id, msg);
+        build_message(security_id, statistic, msg, true);
         internal_server_manager_->send(security_id, msg);
 
         std::cout << msg << std::endl;
