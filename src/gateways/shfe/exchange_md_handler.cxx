@@ -135,7 +135,7 @@ namespace shfe {
     void exchange_md_handler::OnRspError(
             CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
     {
-        logger_ << "Got OnRspError\n";
+        logger_ << "Got OnRspError\n" << *pRspInfo;
     }
 
     void exchange_md_handler::OnRspSubMarketData(
