@@ -159,6 +159,13 @@ namespace shfe {
         LOG(AskVolume5)
     }
 
+    inline std::ostream& operator << (
+            std::ostream& logger,
+            const CThostFtdcSpecificInstrumentField& msg)
+    {
+        LOG(InstrumentID);
+    }
+
 #undef LOG
 
 }}} // tp::gateways::shfe
