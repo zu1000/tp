@@ -166,6 +166,12 @@ namespace shfe {
         LOG(InstrumentID);
     }
 
+    struct meta_data
+    {
+        std::string _instrumentId;
+        std::string _timestamp;
+    };
+
 #undef LOG
 
 }}} // tp::gateways::shfe

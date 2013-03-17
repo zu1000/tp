@@ -168,9 +168,12 @@ namespace shfe {
         statistic.last_         = convert(pDepthMarketData->LastPrice);
         statistic.last_quantity_= pDepthMarketData->Volume;
 
+        meta_data m;
+        m._instrumentId = pDepthMarketData->InstrumentID;
+        m._timestamp    = pDepthMarketData->UpdateTime;
         statistic.utc_timestamp_= atoi(pDepthMarketData->UpdateTime);
         // Set utc_timestamp...
-        event_handler_.handle(statistic, pDepthMarketData->InstrumentID);
+        event_handler_.handle(statistic, &m);
     }
 
 }}} // tp::gateways::shfe

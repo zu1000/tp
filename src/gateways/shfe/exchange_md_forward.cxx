@@ -1,5 +1,7 @@
 #include "exchange_md_forward.hpp"
 
+#include "utils.hpp"
+
 #include <boost/lexical_cast.hpp>
 
 #include <string>
@@ -19,6 +21,7 @@ namespace shfe {
 
     inline void build_message(
             const std::string& security_id,
+            const std::string& timestamp,
             const comm::protocol::internal::statistic_t& statistic,
             std::string& msg, bool longmsg)
     {
@@ -27,7 +30,7 @@ namespace shfe {
         if (longmsg)
         {
             msg = security_id + "," +
-                    boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
+                    timestamp + "," +
                     build_price(statistic.last_, statistic.scale_) + "," +
                     build_price(statistic.open_, statistic.scale_) + "," +
                     build_price(statistic.high_, statistic.scale_) + "," +
@@ -39,7 +42,7 @@ namespace shfe {
         else
         {
             msg = security_id + "," +
-                    boost::lexical_cast<std::string>(statistic.utc_timestamp_) + "," +
+                    timestamp + "," +
                     build_price(statistic.last_, statistic.scale_) + "," +
                     boost::lexical_cast<std::string>(statistic.last_quantity_) + "\n";
         }
@@ -69,15 +72,17 @@ namespace shfe {
             const void* data)
     {
         // Convert data to security id
-        std::string security_id = static_cast<const char*>(data);
+        const meta_data& m = *static_cast<const meta_data*>(data);
 
         // TODO...convert to string
         std::string msg;
-        build_message(security_id, statistic, msg, false);
-        client_manager_->send(security_id, msg);
-        build_message(security_id, statistic, msg, true);
-        internal_server_manager_->send(security_id, msg);
 
+        build_message(m._instrumentId, m._timestamp, statistic, msg, false);
+        std::cout << msg << std::endl;
+        client_manager_->send(m._instrumentId, msg);
+
+        build_message(m._instrumentId, m._timestamp , statistic, msg, true);
+        internal_server_manager_->send(m._instrumentId, msg);
         std::cout << msg << std::endl;
     }
 
