@@ -183,17 +183,23 @@ struct base
 {
     void set_seqno(uint64_t send_seqno, uint64_t recv_seqno)
     {
-        sb_.set_value(SEND_SEQ_NO, send_seqno);
-        sb_.set_value(RECV_SEQ_NO, recv_seqno);
+        b_.set_value(SEND_SEQ_NO, send_seqno);
+        b_.set_value(RECV_SEQ_NO, recv_seqno);
     }
 
     void set_send_time(const char* time, size_t sz)
     {
-        sb_.set_value(SENDING_TIME, time, sz);
+        b_.set_value(SENDING_TIME, time, sz);
+    }
+
+    template<typename S>
+    bool send(S& s)
+    {
+        b_.send(s);
     }
 
 protected:
-    builder_type sb_;
+    builder_type b_;
 };
 
 typedef struct base< fix::simple_builder<1024> > simple_builder_base;
@@ -204,32 +210,27 @@ public:
     logon(const session_info& s_info,
           const app_info& a_info)
     {
-        create_header(sb_, s_info, &a_info);
+        create_header(b_, s_info, &a_info);
 
-        sb_.push_tag(RAW_DATA_LENGTH, 2);
-        sb_.push_tag(RAW_DATA, s_info.password_.size());
-        sb_.push_tag(ENCRYPT_METHOD, 1);
-        sb_.push_tag(HEARTBEAT_INTV, 3);
-        sb_.push_tag(RESET_SEQ_NO, 1);
+        b_.push_tag(RAW_DATA_LENGTH, 2);
+        b_.push_tag(RAW_DATA, s_info.password_.size());
+        b_.push_tag(ENCRYPT_METHOD, 1);
+        b_.push_tag(HEARTBEAT_INTV, 3);
+        b_.push_tag(RESET_SEQ_NO, 1);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(RAW_DATA_LENGTH);
-        init_header(sb_, "A", s_info, body_length, &a_info);
+        size_t body_length = b_.get_length_from(RAW_DATA_LENGTH);
+        init_header(b_, "A", s_info, body_length, &a_info);
 
-        sb_.set_value(RAW_DATA_LENGTH, uint64_t(s_info.password_.size()));
-        sb_.set_value(RAW_DATA, s_info.password_);
-        sb_.set_value(ENCRYPT_METHOD, "0", 1);
-        sb_.set_value(HEARTBEAT_INTV, uint64_t(60));
-        sb_.set_value(RESET_SEQ_NO, "N", 1);
+        b_.set_value(RAW_DATA_LENGTH, uint64_t(s_info.password_.size()));
+        b_.set_value(RAW_DATA, s_info.password_);
+        b_.set_value(ENCRYPT_METHOD, "0", 1);
+        b_.set_value(HEARTBEAT_INTV, uint64_t(60));
+        b_.set_value(RESET_SEQ_NO, "N", 1);
     }
 
-    template<typename S>
-    bool send(S& s)
-    {
-        sb_.send(s);
-    }
 };
 
 class test_request : public simple_builder_base
@@ -237,25 +238,25 @@ class test_request : public simple_builder_base
 public:
     test_request(const session_info& s_info)
     {
-        create_header(sb_, s_info, NULL);
+        create_header(b_, s_info, NULL);
 
-        sb_.push_tag(TEST_REQ_ID, 20);
+        b_.push_tag(TEST_REQ_ID, 20);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(TEST_REQ_ID);
-        init_header(sb_, "1", s_info, body_length, NULL);
+        size_t body_length = b_.get_length_from(TEST_REQ_ID);
+        init_header(b_, "1", s_info, body_length, NULL);
     }
 
     void set_test_req_id(const char* id, size_t sz)
     {
-        sb_.set_value(TEST_REQ_ID, id, sz);
+        b_.set_value(TEST_REQ_ID, id, sz);
     }
 
     void set_test_req_id(uint64_t id)
     {
-        sb_.set_value(TEST_REQ_ID, id);
+        b_.set_value(TEST_REQ_ID, id);
     }
 };
 
@@ -265,12 +266,12 @@ public:
     heartbeat(const session_info& s_info)
     {
         // Create Header
-        create_header(sb_, s_info, NULL);
+        create_header(b_, s_info, NULL);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        init_header(sb_, "0", s_info, 0, NULL);
+        init_header(b_, "0", s_info, 0, NULL);
     }
 };
 
@@ -280,22 +281,22 @@ public:
     resend_request(const session_info& s_info)
     {
         // Create Header
-        create_header(sb_, s_info, NULL);
+        create_header(b_, s_info, NULL);
 
-        sb_.push_tag(BEG_SEQ_NO, 9);
-        sb_.push_tag(END_SEQ_NO, 9);
+        b_.push_tag(BEG_SEQ_NO, 9);
+        b_.push_tag(END_SEQ_NO, 9);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(BEG_SEQ_NO);
-        init_header(sb_, "2", s_info, body_length, NULL);
+        size_t body_length = b_.get_length_from(BEG_SEQ_NO);
+        init_header(b_, "2", s_info, body_length, NULL);
     }
 
     void set_seqno_range(uint64_t beg, uint64_t end)
     {
-        sb_.set_value(BEG_SEQ_NO, beg);
-        sb_.set_value(END_SEQ_NO, end);
+        b_.set_value(BEG_SEQ_NO, beg);
+        b_.set_value(END_SEQ_NO, end);
     }
 };
 
@@ -304,14 +305,14 @@ class sequence_reset : public simple_builder_base
 public:
     sequence_reset(const session_info& s_info)
     {
-        create_header(sb_, s_info, NULL);
-        sb_.push_tag(NEW_SEQ_NO, 9);
+        create_header(b_, s_info, NULL);
+        b_.push_tag(NEW_SEQ_NO, 9);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(NEW_SEQ_NO);
-        init_header(sb_, "4", s_info, body_length, NULL);
+        size_t body_length = b_.get_length_from(NEW_SEQ_NO);
+        init_header(b_, "4", s_info, body_length, NULL);
     }
 };
 
@@ -319,14 +320,14 @@ class logout : public simple_builder_base
 {
     logout(const session_info& s_info)
     {
-        create_header(sb_, s_info, NULL);
-        sb_.push_tag(NEXT_EXP_SEQ_NO, 9);
+        create_header(b_, s_info, NULL);
+        b_.push_tag(NEXT_EXP_SEQ_NO, 9);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(NEXT_EXP_SEQ_NO);
-        init_header(sb_, "5", s_info, body_length, NULL);
+        size_t body_length = b_.get_length_from(NEXT_EXP_SEQ_NO);
+        init_header(b_, "5", s_info, body_length, NULL);
     }
 };
 
@@ -359,93 +360,93 @@ public:
     new_order(const session_info& s_info,
               const static_order_info& s_o_info)
     {
-        create_header(sb_, s_info, NULL);
-        sb_.push_tag(ACCOUNT, s_o_info.account_.size());
-        sb_.push_tag(CLORDID, 20);
-        sb_.push_tag(HANDLE_INST, 1);
-        sb_.push_tag(ORDER_QTY, 9);
-        sb_.push_tag(ORDER_TYPE, 1);
-        sb_.push_tag(PRICE, 20);
-        sb_.push_tag(SIDE, 1);
-        sb_.push_tag(SYMBOL, 6);
-        sb_.push_tag(TIME_IN_FORCE, 1);
-        sb_.push_tag(TRANSACTION_TIME, 21);
-        sb_.push_tag(MANUAL_ORDER_IND, 1);
+        create_header(b_, s_info, NULL);
+        b_.push_tag(ACCOUNT, s_o_info.account_.size());
+        b_.push_tag(CLORDID, 20);
+        b_.push_tag(HANDLE_INST, 1);
+        b_.push_tag(ORDER_QTY, 9);
+        b_.push_tag(ORDER_TYPE, 1);
+        b_.push_tag(PRICE, 20);
+        b_.push_tag(SIDE, 1);
+        b_.push_tag(SYMBOL, 6);
+        b_.push_tag(TIME_IN_FORCE, 1);
+        b_.push_tag(TRANSACTION_TIME, 21);
+        b_.push_tag(MANUAL_ORDER_IND, 1);
         if (s_o_info.sec_type_ == "OPT")
-            sb_.push_tag(POSITION_EFFECT, 1);
-        sb_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
-        sb_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
-        sb_.push_tag(CUSTOMER_OR_FIRM, 1);
+            b_.push_tag(POSITION_EFFECT, 1);
+        b_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
+        b_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
+        b_.push_tag(CUSTOMER_OR_FIRM, 1);
         if (s_o_info.has_max_show_)
-            sb_.push_tag(MAX_SHOW, 9);
-        sb_.push_tag(CTI_CODE, 1);
-        sb_.push_tag(CORREL_CLORDID, 20);
+            b_.push_tag(MAX_SHOW, 9);
+        b_.push_tag(CTI_CODE, 1);
+        b_.push_tag(CORREL_CLORDID, 20);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(ACCOUNT);
-        init_header(sb_, "D", s_info, body_length, NULL);
-        sb_.set_value(ACCOUNT, s_o_info.account_);
-        sb_.set_value(HANDLE_INST, 1ULL);
-        sb_.set_value(SYMBOL, s_o_info.symbol_);
-        sb_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
-        sb_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
-        sb_.set_value(MANUAL_ORDER_IND, "N");
-        sb_.set_value(CTI_CODE, 1ULL);
+        size_t body_length = b_.get_length_from(ACCOUNT);
+        init_header(b_, "D", s_info, body_length, NULL);
+        b_.set_value(ACCOUNT, s_o_info.account_);
+        b_.set_value(HANDLE_INST, 1ULL);
+        b_.set_value(SYMBOL, s_o_info.symbol_);
+        b_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
+        b_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
+        b_.set_value(MANUAL_ORDER_IND, "N");
+        b_.set_value(CTI_CODE, 1ULL);
     }
 
     void set_clordid(const std::string& clordid)
     {
-        sb_.set_value(CLORDID, clordid);
-        //sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
+        //b_.set_value(CORREL_CLORDID, clordid);
     }
 
     void set_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(CLORDID, clordid, sz);
-        //sb_.set_value(CORREL_CLORDID, clordid, sz);
+        b_.set_value(CLORDID, clordid, sz);
+        //b_.set_value(CORREL_CLORDID, clordid, sz);
     }
 
     void set_clordid(uint64_t clordid)
     {
-        sb_.set_value(CLORDID, clordid);
-        //sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
+        //b_.set_value(CORREL_CLORDID, clordid);
     }
 
     void set_price(double price, bool pad = false)
     {
-        sb_.set_value<12,7>(PRICE, price, pad);
+        b_.set_value<12,7>(PRICE, price, pad);
     }
 
     void set_qty(uint64_t qty, bool pad = false)
     {
-        sb_.set_value(ORDER_QTY, qty, pad);
+        b_.set_value(ORDER_QTY, qty, pad);
     }
 
     void set_side(const char side)
     {
-        sb_.set_value(SIDE, &side, 1);
+        b_.set_value(SIDE, &side, 1);
     }
 
     void set_position_effect(const char open_close)
     {
-        sb_.set_value(POSITION_EFFECT, &open_close, 1);
+        b_.set_value(POSITION_EFFECT, &open_close, 1);
     }
 
     void set_order_type(const char type)
     {
-        sb_.set_value(ORDER_TYPE, &type, 1);
+        b_.set_value(ORDER_TYPE, &type, 1);
     }
 
     void set_time_in_force(const char tif)
     {
-        sb_.set_value(TIME_IN_FORCE, &tif, 1);
+        b_.set_value(TIME_IN_FORCE, &tif, 1);
     }
 
     void set_transaction_time(const char* trans_time, size_t sz)
     {
-        sb_.set_value(TRANSACTION_TIME, trans_time, sz);
+        b_.set_value(TRANSACTION_TIME, trans_time, sz);
     }
 };
 
@@ -455,90 +456,90 @@ public:
     cancel_order(const session_info& s_info,
               const static_order_info& s_o_info)
     {
-        create_header(sb_, s_info, NULL);
-        sb_.push_tag(ACCOUNT, s_o_info.account_.size());
-        sb_.push_tag(CLORDID, 20);
-        sb_.push_tag(ORDID, 17);
-        sb_.push_tag(ORIG_CLORDID, 20);
-        sb_.push_tag(SIDE, 1);
-        sb_.push_tag(SYMBOL, 6);
-        sb_.push_tag(TRANSACTION_TIME, 21);
-        sb_.push_tag(MANUAL_ORDER_IND, 1);
-        sb_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
-        sb_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
-        sb_.push_tag(CORREL_CLORDID, 20);
+        create_header(b_, s_info, NULL);
+        b_.push_tag(ACCOUNT, s_o_info.account_.size());
+        b_.push_tag(CLORDID, 20);
+        b_.push_tag(ORDID, 17);
+        b_.push_tag(ORIG_CLORDID, 20);
+        b_.push_tag(SIDE, 1);
+        b_.push_tag(SYMBOL, 6);
+        b_.push_tag(TRANSACTION_TIME, 21);
+        b_.push_tag(MANUAL_ORDER_IND, 1);
+        b_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
+        b_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
+        b_.push_tag(CORREL_CLORDID, 20);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(ACCOUNT);
-        init_header(sb_, "D", s_info, body_length, NULL);
-        sb_.set_value(ACCOUNT, s_o_info.account_);
-        sb_.set_value(SYMBOL, s_o_info.symbol_);
-        sb_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
-        sb_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
-        sb_.set_value(MANUAL_ORDER_IND, "N");
+        size_t body_length = b_.get_length_from(ACCOUNT);
+        init_header(b_, "D", s_info, body_length, NULL);
+        b_.set_value(ACCOUNT, s_o_info.account_);
+        b_.set_value(SYMBOL, s_o_info.symbol_);
+        b_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
+        b_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
+        b_.set_value(MANUAL_ORDER_IND, "N");
     }
 
     void set_clordid(const std::string& clordid)
     {
-        sb_.set_value(CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
     }
 
     void set_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(CLORDID, clordid, sz);
+        b_.set_value(CLORDID, clordid, sz);
     }
 
     void set_clordid(uint64_t clordid)
     {
-        sb_.set_value(CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
     }
 
     void set_correlate_clordid(const std::string& clordid)
     {
-        sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CORREL_CLORDID, clordid);
     }
 
     void set_correlate_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(CORREL_CLORDID, clordid, sz);
+        b_.set_value(CORREL_CLORDID, clordid, sz);
     }
 
     void set_correlate_clordid(uint64_t clordid)
     {
-        sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CORREL_CLORDID, clordid);
     }
 
 
     void set_orig_clordid(const std::string& clordid)
     {
-        sb_.set_value(ORIG_CLORDID, clordid);
+        b_.set_value(ORIG_CLORDID, clordid);
     }
 
     void set_orig_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(ORIG_CLORDID, clordid, sz);
+        b_.set_value(ORIG_CLORDID, clordid, sz);
     }
 
     void set_orig_clordid(uint64_t clordid)
     {
-        sb_.set_value(ORIG_CLORDID, clordid);
+        b_.set_value(ORIG_CLORDID, clordid);
     }
 
     void set_ordid(uint64_t ordid, bool pad = true)
     {
-        sb_.set_value(ORDID, ordid, pad);
+        b_.set_value(ORDID, ordid, pad);
     }
 
     void set_side(const char side)
     {
-        sb_.set_value(SIDE, &side, 1);
+        b_.set_value(SIDE, &side, 1);
     }
 
     void set_transaction_time(const char* trans_time, size_t sz)
     {
-        sb_.set_value(TRANSACTION_TIME, trans_time, sz);
+        b_.set_value(TRANSACTION_TIME, trans_time, sz);
     }
 
 };
@@ -549,127 +550,127 @@ public:
     replace_order(const session_info& s_info,
                 const static_order_info& s_o_info)
     {
-        create_header(sb_, s_info, NULL);
-        sb_.push_tag(ACCOUNT, s_o_info.account_.size());
-        sb_.push_tag(CLORDID, 20);
-        sb_.push_tag(ORDID, 17);
-        sb_.push_tag(HANDLE_INST, 1);
-        sb_.push_tag(ORDER_QTY, 9);
-        sb_.push_tag(ORDER_TYPE, 1);
-        sb_.push_tag(ORIG_CLORDID, 20);
-        sb_.push_tag(PRICE, 20);
-        sb_.push_tag(SIDE, 1);
-        sb_.push_tag(SYMBOL, 6);
-        sb_.push_tag(TIME_IN_FORCE, 1);
-        sb_.push_tag(MANUAL_ORDER_IND, 1);
-        sb_.push_tag(TRANSACTION_TIME, 21);
+        create_header(b_, s_info, NULL);
+        b_.push_tag(ACCOUNT, s_o_info.account_.size());
+        b_.push_tag(CLORDID, 20);
+        b_.push_tag(ORDID, 17);
+        b_.push_tag(HANDLE_INST, 1);
+        b_.push_tag(ORDER_QTY, 9);
+        b_.push_tag(ORDER_TYPE, 1);
+        b_.push_tag(ORIG_CLORDID, 20);
+        b_.push_tag(PRICE, 20);
+        b_.push_tag(SIDE, 1);
+        b_.push_tag(SYMBOL, 6);
+        b_.push_tag(TIME_IN_FORCE, 1);
+        b_.push_tag(MANUAL_ORDER_IND, 1);
+        b_.push_tag(TRANSACTION_TIME, 21);
         if (s_o_info.sec_type_ == "OPT")
-            sb_.push_tag(POSITION_EFFECT, 1);
-        sb_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
-        sb_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
-        sb_.push_tag(CUSTOMER_OR_FIRM, 1);
+            b_.push_tag(POSITION_EFFECT, 1);
+        b_.push_tag(SECURITY_DESC, s_o_info.sec_desc_.size());
+        b_.push_tag(SECURITY_TYPE, s_o_info.sec_type_.size());
+        b_.push_tag(CUSTOMER_OR_FIRM, 1);
         if (s_o_info.has_max_show_)
-            sb_.push_tag(MAX_SHOW, 9);
-        sb_.push_tag(CTI_CODE, 1);
-        sb_.push_tag(CORREL_CLORDID, 20);
+            b_.push_tag(MAX_SHOW, 9);
+        b_.push_tag(CTI_CODE, 1);
+        b_.push_tag(CORREL_CLORDID, 20);
 
-        sb_.finalize();
+        b_.finalize();
 
         // Set Init Value
-        size_t body_length = sb_.get_length_from(ACCOUNT);
-        init_header(sb_, "D", s_info, body_length, NULL);
-        sb_.set_value(ACCOUNT, s_o_info.account_);
-        sb_.set_value(HANDLE_INST, 1ULL);
-        sb_.set_value(SYMBOL, s_o_info.symbol_);
-        sb_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
-        sb_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
-        sb_.set_value(MANUAL_ORDER_IND, "N");
-        sb_.set_value(CTI_CODE, 1ULL);
+        size_t body_length = b_.get_length_from(ACCOUNT);
+        init_header(b_, "D", s_info, body_length, NULL);
+        b_.set_value(ACCOUNT, s_o_info.account_);
+        b_.set_value(HANDLE_INST, 1ULL);
+        b_.set_value(SYMBOL, s_o_info.symbol_);
+        b_.set_value(SECURITY_DESC, s_o_info.sec_desc_);
+        b_.set_value(SECURITY_TYPE, s_o_info.sec_type_);
+        b_.set_value(MANUAL_ORDER_IND, "N");
+        b_.set_value(CTI_CODE, 1ULL);
     }
 
     void set_clordid(const std::string& clordid)
     {
-        sb_.set_value(CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
     }
 
     void set_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(CLORDID, clordid, sz);
+        b_.set_value(CLORDID, clordid, sz);
     }
 
     void set_clordid(uint64_t clordid)
     {
-        sb_.set_value(CLORDID, clordid);
+        b_.set_value(CLORDID, clordid);
     }
 
     void set_correlate_clordid(const std::string& clordid)
     {
-        sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CORREL_CLORDID, clordid);
     }
 
     void set_correlate_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(CORREL_CLORDID, clordid, sz);
+        b_.set_value(CORREL_CLORDID, clordid, sz);
     }
 
     void set_correlate_clordid(uint64_t clordid)
     {
-        sb_.set_value(CORREL_CLORDID, clordid);
+        b_.set_value(CORREL_CLORDID, clordid);
     }
 
     void set_orig_clordid(const std::string& clordid)
     {
-        sb_.set_value(ORIG_CLORDID, clordid);
+        b_.set_value(ORIG_CLORDID, clordid);
     }
 
     void set_orig_clordid(const char* clordid, size_t sz)
     {
-        sb_.set_value(ORIG_CLORDID, clordid, sz);
+        b_.set_value(ORIG_CLORDID, clordid, sz);
     }
 
     void set_orig_clordid(uint64_t clordid)
     {
-        sb_.set_value(ORIG_CLORDID, clordid);
+        b_.set_value(ORIG_CLORDID, clordid);
     }
 
     void set_ordid(uint64_t ordid, bool pad = true)
     {
-        sb_.set_value(ORDID, ordid, pad);
+        b_.set_value(ORDID, ordid, pad);
     }
 
     void set_price(double price, bool pad = false)
     {
-        sb_.set_value<12,7>(PRICE, price, pad);
+        b_.set_value<12,7>(PRICE, price, pad);
     }
 
     void set_qty(uint64_t qty, bool pad = false)
     {
-        sb_.set_value(ORDER_QTY, qty, pad);
+        b_.set_value(ORDER_QTY, qty, pad);
     }
 
     void set_side(const char side)
     {
-        sb_.set_value(SIDE, &side, 1);
+        b_.set_value(SIDE, &side, 1);
     }
 
     void set_position_effect(const char open_close)
     {
-        sb_.set_value(POSITION_EFFECT, &open_close, 1);
+        b_.set_value(POSITION_EFFECT, &open_close, 1);
     }
 
     void set_order_type(const char type)
     {
-        sb_.set_value(ORDER_TYPE, &type, 1);
+        b_.set_value(ORDER_TYPE, &type, 1);
     }
 
     void set_time_in_force(const char tif)
     {
-        sb_.set_value(TIME_IN_FORCE, &tif, 1);
+        b_.set_value(TIME_IN_FORCE, &tif, 1);
     }
 
     void set_transaction_time(const char* trans_time, size_t sz)
     {
-        sb_.set_value(TRANSACTION_TIME, trans_time, sz);
+        b_.set_value(TRANSACTION_TIME, trans_time, sz);
     }
 };
 
@@ -690,44 +691,44 @@ class quote_entry
 {
     quote_entry(const quote_entry_info& q_e_info)
     {
-        sb_.push_tag(QUOTE_ENTRY_ID, 10);
-        sb_.push_tag(SYMBOL, q_e_info.symbol_.size());
-        sb_.push_tag(SECURITY_DESC, q_e_info.sec_desc_.size());
-        sb_.push_tag(SECURITY_TYPE, q_e_info.sec_type_.size());
-        sb_.push_tag(BID_PX, 20);
-        sb_.push_tag(BID_SIZE, 9);
-        sb_.push_tag(OFFER_PX, 20);
-        sb_.push_tag(OFFER_SIZE, 9);
+        b_.push_tag(QUOTE_ENTRY_ID, 10);
+        b_.push_tag(SYMBOL, q_e_info.symbol_.size());
+        b_.push_tag(SECURITY_DESC, q_e_info.sec_desc_.size());
+        b_.push_tag(SECURITY_TYPE, q_e_info.sec_type_.size());
+        b_.push_tag(BID_PX, 20);
+        b_.push_tag(BID_SIZE, 9);
+        b_.push_tag(OFFER_PX, 20);
+        b_.push_tag(OFFER_SIZE, 9);
 
-        sb_.finalize();
+        b_.finalize();
 
-        sb_.set_value(SYMBOL, q_e_info.symbol_);
-        sb_.set_value(SECURITY_DESC, q_e_info.sec_desc_);
-        sb_.set_value(SECURITY_TYPE, q_e_info.sec_type_);
+        b_.set_value(SYMBOL, q_e_info.symbol_);
+        b_.set_value(SECURITY_DESC, q_e_info.sec_desc_);
+        b_.set_value(SECURITY_TYPE, q_e_info.sec_type_);
     }
 
     void set_bid_px(double px, bool pad=false)
     {
-        sb_.set_value<12, 7>(BID_PX, px, pad);
+        b_.set_value<12, 7>(BID_PX, px, pad);
     }
 
     void set_bid_size(uint64_t sz, bool pad=false)
     {
-        sb_.set_value(BID_SIZE, sz, pad);
+        b_.set_value(BID_SIZE, sz, pad);
     }
 
     void set_offer_px(double px, bool pad=false)
     {
-        sb_.set_value<12, 7>(OFFER_PX, px, pad);
+        b_.set_value<12, 7>(OFFER_PX, px, pad);
     }
 
     void set_offer_size(uint64_t sz, bool pad=false)
     {
-        sb_.set_value(OFFER_SIZE, sz, pad);
+        b_.set_value(OFFER_SIZE, sz, pad);
     }
 
 private:
-    fix::simple_builder<1024> sb_;
+    fix::simple_builder<1024> b_;
 };
 
 class quote_set
@@ -735,30 +736,30 @@ class quote_set
 public:
     quote_set(const std::string& underlying_sec_desc)
     {
-        sb_.push_tag(QUOTE_SET_ID, 3);
+        b_.push_tag(QUOTE_SET_ID, 3);
         if (!underlying_sec_desc.empty())
-            sb_.push_tag(UL_SEC_DESC, underlying_sec_desc.size());
-        sb_.push_tag(TOT_QUOTE_ENTRY, 3);
-        sb_.push_tag(NO_QUOTE_ENTRY, 3);
+            b_.push_tag(UL_SEC_DESC, underlying_sec_desc.size());
+        b_.push_tag(TOT_QUOTE_ENTRY, 3);
+        b_.push_tag(NO_QUOTE_ENTRY, 3);
 
-        sb_.finalize();
+        b_.finalize();
 
         if (!underlying_sec_desc.empty())
-            sb_.set_value(UL_SEC_DESC, underlying_sec_desc);
+            b_.set_value(UL_SEC_DESC, underlying_sec_desc);
     }
 
     void set_quote_set_id(uint64_t id, bool pad = false)
     {
-        sb_.set_value(QUOTE_SET_ID, id, pad);
+        b_.set_value(QUOTE_SET_ID, id, pad);
     }
 
     void set_no_entries(uint64_t no, bool pad = false)
     {
-        sb_.set_value(TOT_QUOTE_ENTRY, no, pad);
-        sb_.set_value(NO_QUOTE_ENTRY, no, pad);
+        b_.set_value(TOT_QUOTE_ENTRY, no, pad);
+        b_.set_value(NO_QUOTE_ENTRY, no, pad);
     }
 private:
-    fix::simple_builder<1024> sb_;
+    fix::simple_builder<1024> b_;
 };
 
 typedef struct base< fix::extensible_builder<4096> > extensible_builder_base;
@@ -771,32 +772,33 @@ public:
             const std::string& mm_account)
         : body_length_()
     {
-        create_header(sb_, s_info, NULL);
-        //sb_.push_tag(QUOTE_REQ_ID, 23);
-        sb_.push_tag(QUOTE_ID, 10);
-        sb_.push_tag(MM_ACCOUNT, mm_account.size());
-        sb_.push_tag(MANUAL_ORDER_IND, 1);
-        sb_.push_tag(CUSTOMER_OR_FIRM, 1);
-        sb_.push_tag(CTI_CODE, 1);
-        sb_.push_tag(MM_PROT_RESET, 1);
+        create_header(b_, s_info, NULL);
+        //b_.push_tag(QUOTE_REQ_ID, 23);
+        b_.push_tag(QUOTE_ID, 10);
+        b_.push_tag(MM_ACCOUNT, mm_account.size());
+        b_.push_tag(MANUAL_ORDER_IND, 1);
+        b_.push_tag(CUSTOMER_OR_FIRM, 1);
+        b_.push_tag(CTI_CODE, 1);
+        b_.push_tag(MM_PROT_RESET, 1);
 
-        sb_.finalize();
+        b_.finalize();
 
         // body length is not determined here yet... so...
-        body_length_ = sb_.get_length_from(QUOTE_ID);
-        init_header(sb_, "i", s_info, body_length_, NULL);
+        body_length_ = b_.get_length_from(QUOTE_ID);
+        init_header(b_, "i", s_info, body_length_, NULL);
 
-        sb_.set_value(MM_ACCOUNT, mm_account);
+        b_.set_value(MM_ACCOUNT, mm_account);
     }
 
     template<typename S>
     bool send(S& s)
     {
-        sb_.send(s);
+        b_.set_value(BODY_LENGTH, body_length_+b_.extended_size(), true);
+        b_.send(s);
     }
 
 private:
-    size_t body_length_;
+    uint64_t body_length_;
 };
 
 struct dummy_sender
