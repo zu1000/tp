@@ -1,7 +1,7 @@
-file (GLOB MESSAGE_INTERNAL_TEST_SOURCE *.cxx)
+file (GLOB PROTOCOL_INTERNAL_TEST_SOURCE *.cxx)
 
-add_executable (test_message_internal ${MESSAGE_INTERNAL_TEST_SOURCE})
-target_link_libraries (test_message_internal
+add_executable (test_protocol_internal ${PROTOCOL_INTERNAL_TEST_SOURCE})
+target_link_libraries (test_protocol_internal
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-add_test (TestMessageInternal test_message_internal)
+add_test (TestProtocolInternal test_protocol_internal)
