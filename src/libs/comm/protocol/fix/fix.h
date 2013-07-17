@@ -561,7 +561,7 @@ public:
         uint64_t chksum = (this->chksum()+extended_chksum_)&0xff;
         char* tailer_offset = this->buff_ + size_to_send - this->fields_[10].space();
 
-        char tailer[7] = {'1', '0', '=', 0, 0, 0, 0};
+        char tailer[7] = {'1', '0', '=', '0', '0', '0', '0'};
         i_to_str(chksum, tailer);
 
         memcpy(tailer_offset, tailer, 7);
