@@ -8,16 +8,24 @@
 #include <assert.h>
 #include <math.h>
 
+#include <iostream>
+
 namespace blade { namespace fix {
 
-const int64_t b64_sign_mask = int64_t(1) << 63;
+const uint64_t b64_sign_mask = uint64_t(1) << 63;
+
+inline uint64_t i64abs(int64_t i)
+{
+    if (i < 0) return (~i + 1);
+    return i;
+}
 
 template <size_t N>
-char* i_to_str(int64_t i, char(&b)[N])
+char* i_to_str(int64_t v, char(&b)[N])
 {
     assert(N>=31);
-    size_t sign_offset = 1 ^ (i >> 63);
-    i &= ~b64_sign_mask;
+    size_t sign_offset = (1 ^ (v >> 63)) & 0x1;
+    uint64_t i = i64abs(v);
     int n = N; b[n--] = 0;
     do
     {
@@ -44,13 +52,13 @@ char* ui_to_str(uint64_t u, char(&b)[N])
     return &b[n+1];
 }
 
-template <size_t I, size_t F, size_t N>
-char* db_to_str(double v, char(&b)[N])
+template <size_t N>
+char* db_to_str(double v, size_t I, size_t F, char(&b)[N])
 {
     assert(I+F+1 < N);
 
     double factor = pow(10, F);
-    int64_t n = lround(v*factor);
+    uint64_t n = i64abs(llround(v*factor));
 
     char* d = b + N - 1;
 
@@ -66,9 +74,10 @@ char* db_to_str(double v, char(&b)[N])
     {
         *d = n%10 + '0';
         n /= 10;
+        if (!n) {--d; break;}
     }
 
-    if (n < 0)
+    if (v < 0)
     {
         *d = '-';
         return d;
@@ -80,13 +89,13 @@ char* db_to_str(double v, char(&b)[N])
 void i_to_str(int64_t i, std::string& d)
 {
     char b[31] = {0};
-    d.assign(i_to_str(i, b), b+31);
+    d = i_to_str(i, b);
 }
 
 void ui_to_str(uint64_t u, std::string& d)
 {
     char b[31] = {0};
-    d.assign(ui_to_str(u, b), b+31);
+    d = ui_to_str(u, b);
 }
 
 class field
@@ -95,6 +104,7 @@ public:
     field(unsigned tag, size_t tag_offset, size_t val_size)
     {
         ui_to_str(tag, tag_);
+        tag_ += '=';
         tag_offset_ = tag_offset;
         tag_size_   = tag_.length();
         val_offset_ = tag_offset_ + tag_size_;
@@ -312,8 +322,7 @@ public:
         chksum_ += chksum_delta;
     }
 
-    template<size_t I, size_t F>
-    void set_value(unsigned tag, double v, bool pad=false)
+    void set_value(unsigned tag, double v, size_t F, bool pad=false)
     {
         if (!finalized_) return;
 
@@ -321,7 +330,7 @@ public:
 
         field& f = fields_[tag];
 
-        assert(I+F+1 < f.val_size());
+        size_t I = f.val_size() - (F+1);
 
         static double factor = pow(10, F);
         int64_t n = lround(v*factor);
@@ -485,16 +494,24 @@ private:
         if (finalized_)
             return false;
 
+        if (!size)
+            return false;
+
         // remember the first tag
-        if (fst_tag_ < -1)
+        if (fst_tag_ == -1)
             fst_tag_ = tag;
 
         // prepare field
         field f(tag, space_, size);
 
         // resize if the fields vector is not big enough
+        // expensive, but initialization should only done once
         if (fields_.size() <= tag)
             fields_.resize(tag+1);
+        else
+        if (fields_[tag].val_size()) // already exists
+            return false;
+
         fields_[tag] = f;
 
         // set the last tag
@@ -663,7 +680,7 @@ public:
         std::memcpy(pos_, f.tag().c_str(), f.tag_size());
 
         char str[I+F+2];
-        char *s = db_to_str<I,F,I+F+2>(v, str);
+        char *s = db_to_str<I+F+2>(v, I, F, str);
 
         int size_to_copy = str + sizeof(str) - s;
 
