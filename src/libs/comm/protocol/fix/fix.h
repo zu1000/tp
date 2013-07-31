@@ -218,7 +218,7 @@ public:
             return;
 
         // push the tailer
-        push_tag(10, 3);
+        push_tag(10, 3, true);
 
         int64_t tag = fst_tag_;
 
@@ -462,7 +462,7 @@ public:
         const field& f = fields_[tag];
         assert(f.val_size());
 
-        return size_t((buff_+space_) - f.tag_offset());
+        return space_ - f.tag_offset();
     }
 
     size_t copy_to(char* d, size_t sz, bool include_tailer=true)
@@ -481,7 +481,10 @@ public:
 private:
     void set_tailer()
     {
+        // have to save and recover the chksum_, since set_value will change it
+        size_t chksum = chksum_;
         set_value(10, uint64_t(chksum_ & 0xff));
+        chksum_ = chksum;
     }
 
     bool push_tag(unsigned tag, size_t size, bool allow_tag10)

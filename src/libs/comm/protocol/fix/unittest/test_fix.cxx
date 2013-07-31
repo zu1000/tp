@@ -113,6 +113,30 @@ namespace blade { namespace fix { namespace test {
         BOOST_CHECK_EQUAL(sb.push_tag(2, 0), false);
         BOOST_CHECK_EQUAL(sb.push_tag(11, 1), false);
         BOOST_CHECK_EQUAL(sb.push_tag(10, 1), false);
+
+        // should fail, since not finalized
+        BOOST_CHECK_EQUAL(sb.get_length_from(11), 0);
+
+        // Finalize the message
+        sb.finalize();
+
+        // Check the if we can get the correct length
+        // 102=xxxxxxxxxx|11=xxxxx|131=x|10=xxx|
+        //      14+1         8+1    5+1   6+1 = 37
+        BOOST_CHECK_EQUAL(sb.get_length_from(102), 37);
+        BOOST_CHECK_EQUAL(sb.get_length_from(11), 37 - 15);
+        BOOST_CHECK_EQUAL(sb.get_length_from(131), 37 - 15 - 9);
+        BOOST_CHECK_EQUAL(sb.get_length_from(10), 37 - 15 - 9 -6);
+
+        char buff[200];
+        memset(buff, 0, sizeof(buff));
+
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+
+        size_t chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
     }
 
 }}}
