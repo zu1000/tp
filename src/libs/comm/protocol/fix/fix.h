@@ -281,13 +281,18 @@ public:
 
     void set_value(unsigned tag, const std::string& v, char pad = '0')
     {
+        std::cout << v << std::endl;
         set_value(tag, v.c_str(), v.size(), pad);
     }
 
     template <size_t N>
     void set_value(unsigned tag, const char(&v)[N], char pad = '0')
     {
-        set_value(tag, v, N, pad);
+        int n = N-1;
+        for (; n >= 0; --n)
+            if (v[n]) break;
+
+        set_value(tag, v, n+1, pad);
     }
 
     void set_value(unsigned tag, const char* v, size_t N, char pad = '0')
@@ -303,21 +308,22 @@ public:
         char *d = buff_ + f.val_offset() + f.val_size() - 1;
 
         int chksum_delta = 0;
-        for (size_t i = N-1; i >= 0; --i)
+        for (int i = N-1; i >= 0; --i)
         {
             int delta = v[i] - *d;
-            *d += v[i];
+            *d = v[i];
             chksum_delta += delta;
             d--;
         }
 
-        for (size_t i = 0; i < f.val_size() - N; ++i)
-        {
-            int delta = pad - *d;
-            *d = pad;
-            chksum_delta += delta;
-            d--;
-        }
+        if (pad)
+            for (size_t i = 0; i < f.val_size() - N; ++i)
+            {
+                int delta = pad - *d;
+                *d = pad;
+                chksum_delta += delta;
+                d--;
+            }
 
         chksum_ += chksum_delta;
     }
@@ -333,7 +339,7 @@ public:
         size_t I = f.val_size() - (F+1);
 
         static double factor = pow(10, F);
-        int64_t n = lround(v*factor);
+        uint64_t n = i64abs(llround(v*factor));
 
         char* d = buff_ + f.val_offset() + f.val_size() - 1;
 
@@ -359,11 +365,17 @@ public:
                 break;
         }
 
-        if (n < 0)
+        if (v < 0)
         {
            d = buff_+f.val_offset();
            chksum_delta += '-' - d[0];
-           d[0] += '-';
+           d[0] = '-';
+        }
+        else
+        {
+           d = buff_+f.val_offset();
+           chksum_delta += '0' - d[0];
+           d[0] = '0';
         }
 
         chksum_ += chksum_delta;
@@ -396,6 +408,8 @@ public:
             }
         }
 
+        assert(!v);
+
         chksum_ += chksum_delta;
     }
 
@@ -410,7 +424,7 @@ public:
 
         int chksum_delta = 0;
         bool neg = v < 0;
-        v &= ~b64_sign_mask;
+        v = i64abs(v);
 
         char* d = buff_ + f.val_offset() + f.val_size() - 1;
 
@@ -434,6 +448,16 @@ public:
             *d = '-';
             chksum_delta += delta;
         }
+        else
+        {
+            int delta = '0' - *d; 
+            *d = '0';
+            chksum_delta += delta;
+        }
+
+        assert(!v);
+
+        chksum_ += chksum_delta;
     }
 
     size_t chksum() const

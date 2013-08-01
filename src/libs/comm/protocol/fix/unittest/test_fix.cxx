@@ -128,12 +128,136 @@ namespace blade { namespace fix { namespace test {
         BOOST_CHECK_EQUAL(sb.get_length_from(131), 37 - 15 - 9);
         BOOST_CHECK_EQUAL(sb.get_length_from(10), 37 - 15 - 9 -6);
 
+        // SET STRING
         char buff[200];
         memset(buff, 0, sizeof(buff));
 
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
 
         size_t chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, "helloworld");
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, "");
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, "hello", 5, 0);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        // SET UNSIGNED INTEGER
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, 1ull);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, 13242ull);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, 242ull, true);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        // SET INTEGER
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, -1ll, true);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, -256ll);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(11, 1023ll);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, 2018.27, 2, true);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, 20188.73, 2);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value(102, -10.73, 2, true);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
             chksum += buff[i];
         BOOST_CHECK_EQUAL(sb.chksum(), chksum);
