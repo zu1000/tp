@@ -232,8 +232,9 @@ namespace blade { namespace fix { namespace test {
             chksum += buff[i];
         BOOST_CHECK_EQUAL(sb.chksum(), chksum);
 
+        // Set Double
         memset(buff, 0, sizeof(buff));
-        sb.set_value(102, 2018.27, 2, true);
+        sb.set_value<2>(102, 2018.27, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
         std::cout << buff << std::endl;
 
@@ -243,7 +244,7 @@ namespace blade { namespace fix { namespace test {
         BOOST_CHECK_EQUAL(sb.chksum(), chksum);
 
         memset(buff, 0, sizeof(buff));
-        sb.set_value(102, 20188.73, 2);
+        sb.set_value<2>(102, 20188.73);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
         std::cout << buff << std::endl;
 
@@ -253,7 +254,17 @@ namespace blade { namespace fix { namespace test {
         BOOST_CHECK_EQUAL(sb.chksum(), chksum);
 
         memset(buff, 0, sizeof(buff));
-        sb.set_value(102, -10.73, 2, true);
+        sb.set_value<2>(102, -10.73, true);
+        BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
+        std::cout << buff << std::endl;
+
+        chksum = 0;
+        for (size_t i = 0; i < sb.space() - 7; ++i)
+            chksum += buff[i];
+        BOOST_CHECK_EQUAL(sb.chksum(), chksum);
+
+        memset(buff, 0, sizeof(buff));
+        sb.set_value<4>(102, 10.7301, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
         std::cout << buff << std::endl;
 

@@ -328,7 +328,8 @@ public:
         chksum_ += chksum_delta;
     }
 
-    void set_value(unsigned tag, double v, size_t F, bool pad=false)
+    template<size_t F>
+    void set_value(unsigned tag, double v, bool pad=false)
     {
         if (!finalized_) return;
 
