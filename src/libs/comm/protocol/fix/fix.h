@@ -21,12 +21,11 @@ inline uint64_t i64abs(int64_t i)
 }
 
 template <size_t N>
-char* i_to_str(int64_t v, char(&b)[N])
+char* i_to_str(int64_t v, char(&b)[N], char end = 0)
 {
-    assert(N>=31);
     size_t sign_offset = (1 ^ (v >> 63)) & 0x1;
     uint64_t i = i64abs(v);
-    int n = N; b[n--] = 0;
+    int n = N-1; b[n--] = end;
     do
     {
         b[n--] = i%10 + '0';
@@ -39,10 +38,9 @@ char* i_to_str(int64_t v, char(&b)[N])
 }
 
 template <size_t N>
-char* ui_to_str(uint64_t u, char(&b)[N])
+char* ui_to_str(uint64_t u, char(&b)[N], char end = 0)
 {
-    assert(N>=31);
-    int n = 30; b[n--] = 0;
+    int n = N-1; b[n--] = end;
     do
     {
         b[n--] = u%10 + '0';
@@ -581,8 +579,22 @@ public:
         extended_chksum_ = 0;
     }
 
+    size_t copy_to(char* d, size_t sz, bool include_tailer=true)
+    {
+        size_t size_to_copy = this->space()+extended_size_;
+        uint64_t chksum = (this->chksum()+extended_chksum_)&0xff;
+        char* tailer_offset = this->buff_ + size_to_copy - this->fields_[10].space();
+
+        char tailer[7] = {'1', '0', '=', '0', '0', '0', 1};
+        ui_to_str(chksum, tailer, 1);
+
+        memcpy(tailer_offset, tailer, 7);
+
+        memcpy(d, this->buff_, size_to_copy);
+    }
+
     template<typename builder_type>
-    void copy_from(const builder_type& sb)
+    void copy_from(builder_type& sb)
     {
         if (!this->finalized_)
             return;
@@ -590,7 +602,7 @@ public:
         size_t size_left = buff_size - (this->space()+extended_size_);
         // TODO: Check the size
         assert(size_to_copy < size_left);
-        char* d = this->buff_ + (this->space() - this->field_[10]) + extended_size_;
+        char* d = this->buff_ + (this->space() - this->fields_[10].space()) + extended_size_;
         sb.copy_to(d, size_left, false);
         extended_size_ += size_to_copy;
         extended_chksum_ += sb.chksum();
@@ -606,8 +618,8 @@ public:
         uint64_t chksum = (this->chksum()+extended_chksum_)&0xff;
         char* tailer_offset = this->buff_ + size_to_send - this->fields_[10].space();
 
-        char tailer[7] = {'1', '0', '=', '0', '0', '0', '0'};
-        i_to_str(chksum, tailer);
+        char tailer[7] = {'1', '0', '=', '0', '0', '0', 1};
+        ui_to_str(chksum, tailer, 1);
 
         memcpy(tailer_offset, tailer, 7);
 
@@ -755,14 +767,11 @@ public:
 private:
     void set_tailer()
     {
-        memcpy(pos_, "10=", 3);
-        
-        char str[31];
-        memset(str+28, '0', 3);
-        ui_to_str(chksum_&0xff, str);
-        memcpy(pos_+3, str+28, 3);
+        char tailer[7] = {'1', '0', '=', '0', '0', '0', 1};
+        ui_to_str(chksum_&0xff, tailer, 1);
 
-        pos_[6] = 1;
+        memcpy(pos_, tailer, 7);
+
         pos_ += 7;
     }
 

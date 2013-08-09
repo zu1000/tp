@@ -7,6 +7,14 @@
 
 namespace blade { namespace fix { namespace test {
 
+    template<size_t N>
+    void dump_fix_message(const char(&msg)[N])
+    {
+        for (unsigned i = 0; msg[i] && i < N; ++i)
+            std::cout << (msg[i] == 1 ? '|' : msg[i]);
+        std::cout << std::endl;
+    }
+
     BOOST_AUTO_TEST_CASE(UI_TO_STR)
     {
         char str[31];
@@ -133,7 +141,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
 
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         size_t chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -143,7 +151,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(102, "helloworld");
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -153,7 +161,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(102, "");
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -163,7 +171,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(102, "hello", 5, 0);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -174,7 +182,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, 1ull);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -184,7 +192,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, 13242ull);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -194,7 +202,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, 242ull, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -205,7 +213,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, -1ll, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -215,7 +223,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, -256ll);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -225,7 +233,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value(11, 1023ll);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -236,7 +244,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value<2>(102, 2018.27, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -246,7 +254,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value<2>(102, 20188.73);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -256,7 +264,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value<2>(102, -10.73, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -266,7 +274,7 @@ namespace blade { namespace fix { namespace test {
         memset(buff, 0, sizeof(buff));
         sb.set_value<4>(102, 10.7301, true);
         BOOST_CHECK_EQUAL(sb.copy_to(buff, sizeof(buff)), sb.space());
-        std::cout << buff << std::endl;
+        dump_fix_message(buff);
 
         chksum = 0;
         for (size_t i = 0; i < sb.space() - 7; ++i)
@@ -274,4 +282,42 @@ namespace blade { namespace fix { namespace test {
         BOOST_CHECK_EQUAL(sb.chksum(), chksum);
     }
 
+    BOOST_AUTO_TEST_CASE(EXTENSIBLE_BUILDER)
+    {
+        extensible_builder<1024> eb;
+        simple_builder<1024> sb_1;
+        simple_builder<1024> sb_2;
+
+        BOOST_CHECK_EQUAL(eb.push_tag(1, 10), true);
+        BOOST_CHECK_EQUAL(eb.push_tag(101, 5), true);
+        BOOST_CHECK_EQUAL(eb.push_tag(1321, 1), true);
+
+        eb.finalize();
+
+        BOOST_CHECK_EQUAL(sb_1.push_tag(11, 10), true);
+        BOOST_CHECK_EQUAL(sb_1.push_tag(1, 2), true);
+        BOOST_CHECK_EQUAL(sb_1.push_tag(12, 5), true);
+        BOOST_CHECK_EQUAL(sb_1.push_tag(101, 7), true);
+
+        sb_1.finalize();
+
+        BOOST_CHECK_EQUAL(sb_2.push_tag(21, 12), true);
+        BOOST_CHECK_EQUAL(sb_2.push_tag(20, 1), true);
+        BOOST_CHECK_EQUAL(sb_2.push_tag(201, 10), true);
+
+        sb_2.finalize();
+
+        eb.copy_from(sb_1);
+        eb.copy_from(sb_2);
+
+        char buff[1024];
+        eb.copy_to(buff, sizeof(buff));
+        dump_fix_message(buff);
+
+        size_t chksum = 0;
+        for (size_t i = 0; i < eb.space() + eb.extended_size() - 7; ++i)
+            chksum += buff[i];
+
+        BOOST_CHECK_EQUAL(chksum, eb.chksum() + eb.extended_chksum());
+    }
 }}}
