@@ -319,5 +319,33 @@ namespace blade { namespace fix { namespace test {
             chksum += buff[i];
 
         BOOST_CHECK_EQUAL(chksum, eb.chksum() + eb.extended_chksum());
+
+        eb.reset();
+
+        memset(buff, 0, sizeof(buff));
+        eb.copy_to(buff, sizeof(buff));
+        dump_fix_message(buff);
+
+        chksum = 0;
+        for (size_t i = 0; i < eb.space() + eb.extended_size() - 7; ++i)
+            chksum += buff[i];
+
+        BOOST_CHECK_EQUAL(chksum, eb.chksum() + eb.extended_chksum());
+
+        sb_1.set_value<2>(11, 102.45);
+        sb_2.set_value<2>(201, 10287.45);
+
+        eb.copy_from(sb_1);
+        eb.copy_from(sb_2);
+
+        memset(buff, 0, sizeof(buff));
+        eb.copy_to(buff, sizeof(buff));
+        dump_fix_message(buff);
+
+        chksum = 0;
+        for (size_t i = 0; i < eb.space() + eb.extended_size() - 7; ++i)
+            chksum += buff[i];
+
+        BOOST_CHECK_EQUAL(chksum, eb.chksum() + eb.extended_chksum());
     }
 }}}
