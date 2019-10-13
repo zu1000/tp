@@ -1,0 +1,1 @@
+make -DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH};/home/yyang/Workspace/llvm-install/" ..
