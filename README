@@ -9,3 +9,6 @@ Tips:
      preferable libraries.
    - Boost_USE_MULTITHREADED should be set to false for boost version greater
      than 1.42.
+
+Download Trick:
+1. if you cannot clone via https://, change it to git://
